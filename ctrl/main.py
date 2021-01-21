@@ -8,7 +8,7 @@ import time
 
 if __name__ =='__main__':
     wsc = WSC()
-    wsc.connect('http://localhost:5000')
+    wsc.connect('http://192.168.1.107:5000')
     
     ctrl0 = {'up':0,'down':0,'left':0,'right':0}
     ctrl = {'up':0,'down':0,'left':0,'right':0}
