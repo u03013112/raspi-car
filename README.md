@@ -7,3 +7,7 @@
 3、4G网络接入
 
 实现超视距遥控小车
+
+`注意事项`
+在docker中使用gpio，需要--privileged
+参照https://blog.alexellis.io/gpio-on-swarm/
