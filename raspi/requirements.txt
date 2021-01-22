@@ -1,2 +1,3 @@
 eventlet
 python-socketio
+RPi.GPIO
