@@ -1,4 +1,4 @@
-import RPi.gpio as gpio
+import RPi.GPIO as gpio
 
 ChUp = 11
 ChDown = 12
@@ -19,24 +19,23 @@ class GPIO:
         gpio.output(ChLeft,gpio.LOW)
         gpio.output(ChRight,gpio.LOW)
 
-    def set(self,date):
-        if data['up'] == 1 :
+    def set(self,data):
+        if data['up'] == 0 :
             gpio.output(ChUp,gpio.LOW)
         else :
-            print("up")
             gpio.output(ChUp,gpio.HIGH)
         
-        if data['down'] == 1 :
+        if data['down'] == 0 :
             gpio.output(ChDown,gpio.LOW)
         else :
             gpio.output(ChDown,gpio.HIGH)
 
-        if data['left'] == 1 :
+        if data['left'] == 0 :
             gpio.output(ChLeft,gpio.LOW)
         else :
             gpio.output(ChLeft,gpio.HIGH)
 
-        if data['right'] == 1 :
+        if data['right'] == 0 :
             gpio.output(ChRight,gpio.LOW)
         else :
             gpio.output(ChRight,gpio.HIGH)

@@ -1,6 +1,6 @@
 import eventlet
 import socketio
-from GPIO import GPIO
+from gpio import GPIO
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
