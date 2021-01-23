@@ -20,7 +20,7 @@ def ctrl(sid, data):
 @sio.event
 def exec(sid, data):
     print('exec ', data)
-    exec.exec(data.cmd)
+    exec.exec(data['cmd'])
 
 @sio.event
 def disconnect(sid):

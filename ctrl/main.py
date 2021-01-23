@@ -18,6 +18,9 @@ if __name__ =='__main__':
             time.sleep(1)
             continue
         
+        wsc.send('exec',{'cmd':'pkill raspivid'})
+        wsc.send('exec',{'cmd':'raspivid -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 640 -h 480 -fps 15 &'})
+
         def print_event_json(event):
             print(event.to_json(ensure_ascii=sys.stdout.encoding != 'utf-8'))
             sys.stdout.flush()
