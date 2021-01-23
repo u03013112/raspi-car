@@ -1,12 +1,12 @@
 import eventlet
 import socketio
 from gpio import GPIO
-from exec import EXEC
+from execute import EXEC
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
 gpio = GPIO()
-exec = EXEC()
+execute = EXEC()
 
 @sio.event
 def connect(sid, environ):
@@ -20,7 +20,7 @@ def ctrl(sid, data):
 @sio.event
 def exec(sid, data):
     print('exec ', data)
-    exec.exec(data['cmd'])
+    execute.exec(data['cmd'])
 
 @sio.event
 def disconnect(sid):

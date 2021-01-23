@@ -3,7 +3,7 @@ import os
 class EXEC:
     def __init__(self):
         pass
-    def exec(self,cmd):
+    def execute(self,cmd):
         prefix = "nsenter --mount=/host/proc/1/ns/mnt "
         os.system(prefix + cmd)
     def openCamera(self):
@@ -13,7 +13,7 @@ class EXEC:
         self.exec("pkill raspivid")
 
 if __name__ == '__main__':
-    exec = EXEC()
-    #exec.openCamera()
-    exec.closeCamera()
+    execute = EXEC()
+    #execute.openCamera()
+    execute.closeCamera()
     
