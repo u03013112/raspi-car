@@ -5,7 +5,7 @@ class EXEC:
     def __init__(self):
         pass
     def exec(self,cmd):
-        val = os.system('ls -al')
+        val = os.system(cmd)
         print(val)
 
 if __name__ == '__main__':
