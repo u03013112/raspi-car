@@ -11,3 +11,4 @@ services:
     privileged: true
     volumes:
       - /proc:/host/proc
+      - ./:/home/code
