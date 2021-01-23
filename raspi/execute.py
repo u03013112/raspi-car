@@ -8,9 +8,9 @@ class EXEC:
         os.system(prefix + cmd)
     def openCamera(self):
         cmd = "raspivid -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 640 -h 480 -fps 15 &"
-        self.exec(cmd)
+        self.execute(cmd)
     def closeCamera(self):
-        self.exec("pkill raspivid")
+        self.execute("pkill raspivid")
 
 if __name__ == '__main__':
     execute = EXEC()
