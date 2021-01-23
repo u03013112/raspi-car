@@ -10,4 +10,4 @@ class EXEC:
 
 if __name__ == '__main__':
     exec = EXEC()
-    exec.exec("nsenter --mount=/host/proc/1/ns/mnt raspivid -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 640 -h 480 -fps 20")        
+    exec.exec("nsenter --mount=/host/proc/1/ns/mnt raspivid -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 640 -h 480 -fps 20 &")
