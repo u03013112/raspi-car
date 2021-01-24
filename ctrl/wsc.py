@@ -21,7 +21,8 @@ class WSC:
         self.sio.connect(url)
 
     def send(self,topic,data):
-        self.sio.emit(topic,data)
+        if self.ready == 1:
+            self.sio.emit(topic,data)
 
 if __name__ == '__main__':
     wsc = WSC()
