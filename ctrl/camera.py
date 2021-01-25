@@ -18,6 +18,7 @@ class Camera(threading.Thread):
                     camera=cv2.VideoCapture("tcp://baipiao.com:6088")
                 except Exception as e:
                     print('Error:',e)
+                    time.sleep(1)
                     continue
                 print('connected camera successed!')
 
@@ -26,11 +27,13 @@ class Camera(threading.Thread):
                         success,frame = camera.read()
                         if success==False:
                             print('camera read err!')
+                            time.sleep(1)
                             break
                         self.frame = frame
                         # print(self.frame.shape)
                     else:
                         print('camera not open!')
+                        time.sleep(1)
                         break
 
                 camera.release()
