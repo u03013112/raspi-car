@@ -1,6 +1,7 @@
 from cv2 import cv2
 import sys
 import time
+import math
 import threading
 import numpy as np
 
@@ -9,6 +10,27 @@ class Camera(threading.Thread):
         threading.Thread.__init__(self)
         self.isQuit = False
         self.frame = np.zeros(480*640*3).reshape(480,640,3)
+        self.fps = 0.0
+        
+        # 用于计算一个粗略的fps
+        self.lastTime = 0
+        self.lastFrameCount = 0
+    
+    # 获取到了一帧的时候调用，用于计算粗略的帧速率，不准，但是可以接受 
+    def gotAFrame(self):
+        if self.lastTime == 0 :
+            self.lastTime = time.time()
+        
+        self.lastFrameCount += 1
+
+        now = time.time()
+        if now - self.lastTime > 1 :
+            count = self.lastFrameCount
+            t = now - self.lastTime
+            self.fps = round(count/t)
+
+            self.lastTime = now
+            self.lastFrameCount = 1
 
     def run(self):
         try:
@@ -31,6 +53,7 @@ class Camera(threading.Thread):
                             break
                         self.frame = frame
                         # print(self.frame.shape)
+                        self.gotAFrame()
                     else:
                         print('camera not open!')
                         time.sleep(1)

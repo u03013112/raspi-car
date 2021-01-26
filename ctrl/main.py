@@ -23,7 +23,7 @@ if __name__ =='__main__':
     kInput = KInput(wsc)
     kInput.start()
 
-    display = Display(camera)
+    display = Display(camera,kInput)
     display.start()
 
     

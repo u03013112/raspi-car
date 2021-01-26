@@ -40,7 +40,7 @@ class KInput:
                 self.ctrl0['left'] = self.ctrl['left'] 
                 self.ctrl0['right'] = self.ctrl['right']
                 self.wsc.send('ctrl',self.ctrl)
-                print(self.ctrl)
+                # print(self.ctrl)
         keyboard.on_press(callback, suppress=True)
         keyboard.on_release(callback)
         
