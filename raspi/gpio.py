@@ -39,7 +39,7 @@ class GPIO:
 
         if data['left'] == 1 and data['right'] == 0:
             self.pwm.ChangeDutyCycle(8)
-        else if data['right'] == 1 and data['left'] == 0 :
+        elif data['right'] == 1 and data['left'] == 0 :
             self.pwm.ChangeDutyCycle(4)
         else:
             self.pwm.ChangeDutyCycle(0)
