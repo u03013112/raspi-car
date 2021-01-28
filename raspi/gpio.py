@@ -22,8 +22,8 @@ class GPIO:
         gpio.setup(ChLeft,gpio.OUT)
         gpio.setup(ChRight,gpio.OUT)
 
-        gpio.setup(servo, gpio.OUT)
-        self.pwm = gpio.PWM(servo, 50)
+        gpio.setup(ChServo, gpio.OUT)
+        self.pwm = gpio.PWM(ChServo, 50)
         self.pwm.start(0)
 
     def set(self,data):
