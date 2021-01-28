@@ -21,7 +21,7 @@ gpio.setup(pin, gpio.OUT)
 pwm = gpio.PWM(pin, 50)
 pwm.start(0)
 
-for i in [0,10,20,30,40,50,60,70,80,90,100]:
+for i in range(2,12):
     print(i)
     pwm.ChangeDutyCycle(i)
     sleep(1)
