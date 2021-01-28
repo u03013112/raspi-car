@@ -19,8 +19,8 @@ class GPIO:
         gpio.output(ChDown,gpio.LOW)
         # gpio.output(ChLeft,gpio.LOW)
         # gpio.output(ChRight,gpio.LOW)
-        gpio.setup(ChLeft,gpio.OUT)
-        gpio.setup(ChRight,gpio.OUT)
+        gpio.output(ChLeft,gpio.LOW)
+        gpio.output(ChRight,gpio.HIGH)
 
         gpio.setup(ChServo, gpio.OUT)
         self.pwm = gpio.PWM(ChServo, 50)
