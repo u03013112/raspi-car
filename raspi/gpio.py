@@ -38,9 +38,9 @@ class GPIO:
             gpio.output(ChDown,gpio.HIGH)
 
         if data['left'] == 1 and data['right'] == 0:
-            self.pwm.ChangeDutyCycle(11)
+            self.pwm.ChangeDutyCycle(10)
         elif data['right'] == 1 and data['left'] == 0 :
-            self.pwm.ChangeDutyCycle(4)
+            self.pwm.ChangeDutyCycle(5)
         else:
             self.pwm.ChangeDutyCycle(0)
             
