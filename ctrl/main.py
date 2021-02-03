@@ -6,6 +6,7 @@ from kInput import KInput
 from ctrl import Ctrl
 from camera import Camera
 from display import Display
+from ping import Ping
 
 if __name__ =='__main__':
     wsc = WSC()
@@ -17,13 +18,17 @@ if __name__ =='__main__':
     ctrl = Ctrl(wsc)
     ctrl.restartCamera()
 
+    ping = Ping(wsc)
+    ping.start()
+    wsc.setPing(ping)
+
     camera = Camera()
     camera.start()
 
     kInput = KInput(wsc)
     kInput.start()
 
-    display = Display(camera,kInput)
+    display = Display(camera,kInput,ping)
     display.start()
 
     

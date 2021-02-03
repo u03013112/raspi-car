@@ -4,6 +4,7 @@ import time
 class WSC:
     def __init__(self):
         sio = socketio.Client()
+        self.ping = None
         @sio.event
         def connect():
             print('connection established')
@@ -14,6 +15,12 @@ class WSC:
             print('disconnected from server')
             self.ready = 0
 
+        @sio.event
+        def ping(sid, data):
+            print('ping ', data)
+            if self.ping != None:
+                self.ping.pong()
+
         self.ready = 0
         self.sio = sio
 
@@ -23,6 +30,9 @@ class WSC:
     def send(self,topic,data):
         if self.ready == 1:
             self.sio.emit(topic,data)
+
+    def setPing(self,ping):
+        self.ping = ping
 
 if __name__ == '__main__':
     wsc = WSC()
