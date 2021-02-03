@@ -59,8 +59,10 @@ class GPIO:
         
         if data['status'] == 'low' :
             gpio.output(channel,gpio.LOW)
+            print(channel,'low')
         if data['status'] == 'high' :
             gpio.output(channel,gpio.HIGH)
+            print(channel,'high')
 
         if data['pwm'] != 0 :
             self.pwm.ChangeDutyCycle(data['pwm'])

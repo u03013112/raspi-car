@@ -18,17 +18,23 @@ class KInput:
             if event.event_type == 'down' :
                 if event.name == 'up' :
                     self.ctrl['up'] = 1
+                    self.sendRaw({'ch':'up','status':'high'})
                 if event.name == 'down' :
                     self.ctrl['down'] = 1
+                    self.sendRaw({'ch':'down','status':'high'})
                 if event.name == 'left' :
                     self.ctrl['left'] = 1
+                    self.sendRaw({'ch':'left','status':'high'})
                 if event.name == 'right' :
                     self.ctrl['right'] = 1
+                    
             if event.event_type == 'up' :
                 if event.name == 'up' :
                     self.ctrl['up'] = 0
+                    self.sendRaw({'ch':'up','status':'low'})
                 if event.name == 'down' :
                     self.ctrl['down'] = 0
+                    self.sendRaw({'ch':'down','status':'low'})
                 if event.name == 'left' :
                     self.ctrl['left'] = 0
                 if event.name == 'right' :
@@ -39,11 +45,13 @@ class KInput:
                 self.ctrl0['down'] = self.ctrl['down'] 
                 self.ctrl0['left'] = self.ctrl['left'] 
                 self.ctrl0['right'] = self.ctrl['right']
-                self.wsc.send('ctrl',self.ctrl)
+                # self.wsc.send('ctrl',self.ctrl)
                 # print(self.ctrl)
         keyboard.on_press(callback, suppress=True)
         keyboard.on_release(callback)
-        
+    def sendRaw(self,data):
+        self.wsc.send('ctrlRaw',data)
+        print('send ',data)
 if __name__ == '__main__':
     kInput = KInput('')
     kInput.start()
