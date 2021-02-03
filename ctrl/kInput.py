@@ -56,7 +56,7 @@ class KInput:
             if self.ctrl0['right'] != self.ctrl['right'] :
                 self.ctrl0['right'] = self.ctrl['right']
                 if self.ctrl['right'] == 1 :
-                    self.sendRaw({'ch':'servo','pwm':5})
+                    self.sendRaw({'ch':'servo','pwm':6})
                 else :
                     self.sendRaw({'ch':'servo','pwm':0})
                 
@@ -65,8 +65,6 @@ class KInput:
     def sendRaw(self,data):
         if 'status' not in data :
             data['status'] = ''
-        if 'pwm' not in data :
-            data['pwm'] = 0
         self.wsc.send('ctrlRaw',data)
         print('send ',data)
 if __name__ == '__main__':
