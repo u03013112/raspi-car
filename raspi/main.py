@@ -23,6 +23,11 @@ def ctrlRaw(sid, data):
     gpio.setRaw(data)
 
 @sio.event
+def ping(sid, data):
+    print('ping ', data)
+    sid.emit('ping',data)
+
+@sio.event
 def exec(sid, data):
     print('exec ', data)
     e.execute(data['cmd'])
