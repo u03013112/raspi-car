@@ -44,7 +44,24 @@ class GPIO:
         else:
             self.pwm.ChangeDutyCycle(0)
             
-
+    def setRaw(self,data):
+        channel = 0
+        if data['ch'] == 'up' :
+            channel = ChUp
+        if data['ch'] == 'down' :
+            channel = ChDown
+        if data['ch'] == 'left' :
+            channel = ChLeft
+        if data['ch'] == 'right' :
+            channel = ChRight
+        if data['ch'] == 'servo' :
+            channel = ChServo
         
+        if data['status'] == 'low' :
+            gpio.output(channel,gpio.LOW)
+        if data['status'] == 'high' :
+            gpio.output(channel,gpio.HIGH)
 
+        if data['pwm'] != 0 :
+            self.pwm.ChangeDutyCycle(data['pwm'])
     

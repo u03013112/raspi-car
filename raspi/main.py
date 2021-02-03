@@ -18,6 +18,11 @@ def ctrl(sid, data):
     gpio.set(data)
 
 @sio.event
+def ctrl(sid, data):
+    print('ctrlRaw ', data)
+    gpio.setRaw(data)
+
+@sio.event
 def exec(sid, data):
     print('exec ', data)
     e.execute(data['cmd'])
