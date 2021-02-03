@@ -18,7 +18,7 @@ def ctrl(sid, data):
     gpio.set(data)
 
 @sio.event
-def ctrl(sid, data):
+def ctrlRaw(sid, data):
     print('ctrlRaw ', data)
     gpio.setRaw(data)
 
