@@ -16,10 +16,10 @@ class WSC:
             self.ready = 0
 
         @sio.event
-        def ping(sid, data):
-            print('ping ', data)
+        def ping(data):
+            # print('ping ', data)
             if self.ping != None:
-                self.ping.pong()
+                self.ping.pong(data)
 
         self.ready = 0
         self.sio = sio

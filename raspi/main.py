@@ -24,7 +24,7 @@ def ctrlRaw(sid, data):
 
 @sio.event
 def ping(sid, data):
-    print('ping ', data)
+    # print('ping ', data)
     sio.emit('ping',data)
 
 @sio.event

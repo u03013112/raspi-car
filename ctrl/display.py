@@ -18,7 +18,7 @@ class Display:
                 fps = 'fps:'+str(self.camera.fps)
                 frame = cv2.putText(self.camera.frame,fps,  
                 (20, 30),  fontFace= cv2.FONT_HERSHEY_SIMPLEX, 
-                fontScale=1, color=(0,0,0xff),
+                fontScale=0.5, color=(0,0,0xff),
                 thickness=1, lineType=cv2.LINE_AA) 
                 # add kInput
                 i = self.kInput.ctrl
@@ -64,10 +64,10 @@ class Display:
                     fontScale=0.8, color=(0xff,0xff,0xff),
                     thickness=1, lineType=cv2.LINE_AA) 
                 #ping
-                pingDt = 'ping:'+str(self.ping.time)
+                pingDt = 'ping:'+str(self.ping.getDt())+'ms'
                 frame = cv2.putText(self.camera.frame,pingDt,  
                 (500, 30),  fontFace= cv2.FONT_HERSHEY_SIMPLEX, 
-                fontScale=1, color=(0,0,0xff),
+                fontScale=0.5, color=(0,0,0xff),
                 thickness=1, lineType=cv2.LINE_AA) 
                 cv2.imshow("cam", frame)
                 key = cv2.waitKey(33)
