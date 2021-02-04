@@ -38,6 +38,7 @@ class Camera(threading.Thread):
                 try:
                     # print('try 2 connect rtsp')
                     camera=cv2.VideoCapture("tcp://baipiao.com:6088")
+                    # camera=cv2.VideoCapture("tcp://pi.u03013112.cn:8888")
                 except Exception as e:
                     print('Error:',e)
                     time.sleep(1)
