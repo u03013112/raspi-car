@@ -7,4 +7,4 @@ class Ctrl:
     def restartCamera(self):
         self.wsc.send('exec',{'cmd':'pkill raspivid'})
         # self.wsc.send('exec',{'cmd':'raspivid -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 640 -h 480 -fps 15 -b 2000000 &'})
-        self.wsc.send('exec',{'cmd':'raspivid --profile high -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 1280 -h 720 -fps 30 &'})
+        self.wsc.send('exec',{'cmd':'raspivid --profile high -l -o tcp://0.0.0.0:8888 -hf -vf -t 0 -w 960 -h 720 -fps 40 &'})

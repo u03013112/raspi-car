@@ -27,6 +27,9 @@ class WSC:
     def connect(self,url):
         self.sio.connect(url)
 
+    def disconnect(self):
+        self.sio.disconnect()
+
     def send(self,topic,data):
         if self.ready == 1:
             self.sio.emit(topic,data)

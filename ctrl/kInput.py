@@ -9,6 +9,8 @@ class KInput:
         self.ctrl0 = {'up':0,'down':0,'left':0,'right':0}
         self.ctrl = {'up':0,'down':0,'left':0,'right':0}
         self.wsc = wsc
+        # status : l or r or 0
+        self.status = '0'
 
     def status(self):
         return self.ctrl
@@ -51,20 +53,29 @@ class KInput:
                 self.ctrl0['left'] = self.ctrl['left']
                 if self.ctrl['left'] == 1 :
                     self.sendRaw({'ch':'servo','pwm':9})
+                    self.status = 'l'
                 else :
-                    self.sendRaw({'ch':'servo','pwm':0})
+                    self.sendRaw({'ch':'servo','pwm':7})
+                    self.status = '0'
             if self.ctrl0['right'] != self.ctrl['right'] :
                 self.ctrl0['right'] = self.ctrl['right']
                 if self.ctrl['right'] == 1 :
                     self.sendRaw({'ch':'servo','pwm':6})
+                    self.status = 'r'
                 else :
-                    self.sendRaw({'ch':'servo','pwm':0})
+                    self.sendRaw({'ch':'servo','pwm':8})
+                    self.sendRaw({'ch':'servo','pwm':7})
+                    self.status = '0'
                 
         keyboard.on_press(callback, suppress=True)
         keyboard.on_release(callback)
     def sendRaw(self,data):
         if 'status' not in data :
             data['status'] = ''
+        if 'pwm' not in data :
+            if self.status == '0' :
+                data['pwm'] = 0
+                # 用来恢复pwm主动回轮状态
         self.wsc.send('ctrlRaw',data)
         print('send ',data)
 if __name__ == '__main__':
