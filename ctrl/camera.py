@@ -15,7 +15,15 @@ class Camera(threading.Thread):
         # 用于计算一个粗略的fps
         self.lastTime = 0
         self.lastFrameCount = 0
-    
+        self.camera = None
+
+    def getStatus(self):
+        if self.camera == None:
+            return -1
+        if self.camera.isOpened() == False:
+            return -2
+        return 0
+
     # 获取到了一帧的时候调用，用于计算粗略的帧速率，不准，但是可以接受 
     def gotAFrame(self):
         if self.lastTime == 0 :
@@ -39,8 +47,10 @@ class Camera(threading.Thread):
                     # print('try 2 connect rtsp')
                     camera=cv2.VideoCapture("tcp://baipiao.com:6088")
                     # camera=cv2.VideoCapture("tcp://pi.u03013112.cn:8888")
+                    self.camera = camera
                 except Exception as e:
                     print('Error:',e)
+                    self.camera = None
                     time.sleep(1)
                     continue
                 print('connected camera successed!')

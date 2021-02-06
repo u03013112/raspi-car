@@ -5,14 +5,14 @@ import time
 from kInput import KInput
 from ctrl import Ctrl
 from camera import Camera
-from display import Display
 from ping import Ping
+from guiNew import GUI
 
 if __name__ =='__main__':
     wsc = WSC()
     wsc.connect('http://baipiao.com:6050')
     
-    # 这里应该是异步回调，图省事先
+    # # 这里应该是异步回调，图省事先
     time.sleep(1)
 
     ctrl = Ctrl(wsc)
@@ -28,7 +28,5 @@ if __name__ =='__main__':
     kInput = KInput(wsc)
     kInput.start()
 
-    display = Display(camera,kInput,ping)
-    display.start()
-
-    
+    gui = GUI(wsc,camera,ctrl,ping,kInput)
+    gui.show()
