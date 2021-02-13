@@ -2,6 +2,7 @@ import eventlet
 import socketio
 from gpio import GPIO
 from execute import EXEC
+import time
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
@@ -24,8 +25,9 @@ def ctrlRaw(sid, data):
 
 @sio.event
 def ping(sid, data):
-    # print('ping ', data)
-    sio.emit('ping',data)
+    sendData = {}
+    sendData['time'] = time.time()
+    sio.emit('ping',sendData)
 
 @sio.event
 def exec(sid, data):
