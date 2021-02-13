@@ -26,6 +26,7 @@ def ctrlRaw(sid, data):
 @sio.event
 def ping(sid, data):
     sendData = {}
+    sendData['id'] = data['id']
     sendData['time'] = time.time()
     sio.emit('ping',sendData)
 
