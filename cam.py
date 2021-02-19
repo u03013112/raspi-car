@@ -20,11 +20,14 @@ if __name__ =='__main__':
         while True:
             if camera.isOpened():
                 success,frame = camera.read()
+                t0 = time.time()
                 if success==False:
                     print('camera read err!')
                     break
 
                 cv2.imshow("cam", frame)
+                t1 = time.time()
+                print(t1-t0)
                 key = cv2.waitKey(1)
             else:
                 print('camera not open!')
