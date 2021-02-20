@@ -32,7 +32,7 @@ if __name__ =='__main__':
     process = (
         ffmpeg
         .input('pipe:', format='rawvideo', pix_fmt='bgr24', s='{}x{}'.format(int(camera.get(cv2.CAP_PROP_FRAME_WIDTH)), int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))))
-        .output('pipe:', format='h264', **{'tune':'zerolatency'})
+        .output('pipe:', format='h264', **{'r':'20','tune':'zerolatency','preset':'ultrafast'})
         .run_async(pipe_stdin=True,pipe_stdout=True)
     )
 
