@@ -27,7 +27,7 @@ if __name__ =='__main__':
 
                 cv2.imshow("cam", frame)
                 t1 = time.time()
-                print(t1-t0)
+                # print(t1-t0)
                 key = cv2.waitKey(1)
             else:
                 print('camera not open!')

@@ -34,7 +34,7 @@ if __name__ =='__main__':
 
         t2 = s.recv(8)
         t2 = int.from_bytes(t2,'big')
-        print("t2:",math.floor(time.time()*1000)-t2)
+        # print("t2:",math.floor(time.time()*1000)-t2)
 
         data = s.recv(l)
         l -= len(data)
