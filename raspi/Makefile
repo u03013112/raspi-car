@@ -1,5 +1,5 @@
 IMAGE_PREFIX=u03013112
-IMAGE_NAME=rapsi-car
+IMAGE_NAME=raspi-car
 IMAGE_TAG=1.0
 all:
 	docker build . -t ${IMAGE_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}

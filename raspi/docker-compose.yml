@@ -1,8 +1,8 @@
 version: '2'
 services:
-  ddns-local:
-    image: u03013112/rapsi-car:1.0
-    container_name: rapsi-car
+  rapsi-car:
+    image: u03013112/raspi-car:1.0
+    container_name: raspi-car
     tty: true
     restart: always
     ports:
@@ -11,4 +11,4 @@ services:
     privileged: true
     volumes:
       - /proc:/host/proc
-      - ./:/home/code
+      - ./:/usr/src/app

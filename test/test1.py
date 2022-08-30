@@ -4,12 +4,16 @@ if __name__ =='__main__':
     camera=cv2.VideoCapture(0)
     # camera.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
     # camera.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
-    # camera.set(cv2.CAP_PROP_POS_FRAMES,30)
+    
+    camera.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter.fourcc('M','J','P','G'))
+    camera.set(cv2.CAP_PROP_POS_FRAMES,30)
+
 
     print('{}x{} fps:{}'.format(
         camera.get(cv2.CAP_PROP_FRAME_WIDTH),
         camera.get(cv2.CAP_PROP_FRAME_HEIGHT),
         camera.get(cv2.CAP_PROP_POS_FRAMES)))
+        
     while True:
         if camera.isOpened():
             success,frame = camera.read()
