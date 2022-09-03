@@ -1,6 +1,6 @@
 import eventlet
 import socketio
-from gpio import GPIO
+from gpio2 import GPIO
 from execute import EXEC
 import time
 
@@ -13,10 +13,11 @@ e = EXEC()
 def connect(sid, environ):
     print('connect ', sid)
 
-@sio.event
-def ctrl(sid, data):
-    print('ctrl ', data)
-    gpio.set(data)
+# ctrl作废，之后均使用pwm来控制
+# @sio.event
+# def ctrl(sid, data):
+#     print('ctrl ', data)
+#     gpio.set(data)
 
 @sio.event
 def ctrlRaw(sid, data):
@@ -40,5 +41,4 @@ def disconnect(sid):
     print('disconnect ', sid)
 
 if __name__ == '__main__':
-
     eventlet.wsgi.server(eventlet.listen(('', 5000)), app)

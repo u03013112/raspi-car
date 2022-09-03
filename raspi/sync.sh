@@ -1,6 +1,7 @@
 #!/bin/bash
+raspiIP=`arp-scan -I en0 -l|grep "dc:a6:32:f0:87:6b"|awk '{print $1}'`
 SRC=~/Documents/leeknet/DispatcherPlatform/git/raspi-car/raspi
-DST=root@192.168.1.63:/home/pi/raspi-car/
+DST=root@${raspiIP}:/home/pi/raspi-car/
 trap 'exit' INT
 while :
     do

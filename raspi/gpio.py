@@ -1,3 +1,5 @@
+# 与gpio.py的区别，这是新的电调，不再使用l298n
+
 import RPi.GPIO as gpio
 
 ChUp = 11

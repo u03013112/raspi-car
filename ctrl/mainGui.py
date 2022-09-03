@@ -10,7 +10,8 @@ from guiNew import GUI
 
 if __name__ =='__main__':
     wsc = WSC()
-    wsc.connect('http://baipiao.com:6050')
+    # wsc.connect('http://baipiao.com:6050')
+    wsc.connect('http://192.168.1.63:5000')
     
     # # 这里应该是异步回调，图省事先
     time.sleep(1)
