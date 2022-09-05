@@ -18,7 +18,7 @@ Ubuntu
 扫描以太网IP地址：
 sudo arp-scan --interface en0 --localnet 
 简写
-sudo arp-scan --I en0 --l
+sudo arp-scan -I en0 -l
 
 ## 新的有刷电调的坑
 之前用的l298n来做的动力控制，主要问题是电流不足。想要电机有足够的电流，选择了支持电流更大的eagle 30A有刷电调。采用PWM来控制。
