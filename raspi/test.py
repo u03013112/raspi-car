@@ -13,7 +13,7 @@ gpio.setup(pwmPin, gpio.OUT)
 
 pwm = gpio.PWM(pwmPin, frez)
 
-pwm.start(10)
+pwm.start(15)
 print('pwm is start')
 time.sleep(10)
 
@@ -23,7 +23,7 @@ for i in range (10,20):
     print('cycle:',i)
     time.sleep(1)
 print('exit')
-pwm.ChangeDutyCycle(10)
-time.sleep(10)
+pwm.ChangeDutyCycle(15)
+# time.sleep(10)
 pwm.stop()
 gpio.cleanup()

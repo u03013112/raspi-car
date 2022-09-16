@@ -40,15 +40,16 @@ class KInput:
             if self.ctrl0['up'] != self.ctrl['up'] :
                 self.ctrl0['up'] = self.ctrl['up']
                 if self.ctrl['up'] == 1 :
-                    self.sendRaw({'ch':'pwm','pwm':11,'status':'up'})
-                # else :
-                #     self.sendRaw({'ch':'pwm','status':'low'})
+                    self.sendRaw({'ch':'pwm','pwm':13,'status':'up'})
+                else :
+                    self.sendRaw({'ch':'pwm','pwm':15,'status':'stop'})
+
             if self.ctrl0['down'] != self.ctrl['down'] :
                 self.ctrl0['down'] = self.ctrl['down']
                 if self.ctrl['down'] == 1 :
-                    self.sendRaw({'ch':'pwm','pwm':10,'status':'down'})
-                # else :
-                #     self.sendRaw({'ch':'down','status':'low'})
+                    self.sendRaw({'ch':'pwm','pwm':117,'status':'down'})
+                else :
+                    self.sendRaw({'ch':'pwm','pwm':15,'status':'stop'})
             if self.ctrl0['left'] != self.ctrl['left'] :
                 self.ctrl0['left'] = self.ctrl['left']
                 if self.ctrl['left'] == 1 :
