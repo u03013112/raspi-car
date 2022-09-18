@@ -47,7 +47,7 @@ def disconnect(sid):
 def speed(sid, data):
     r = s.getSpeed()
     sendData = {'speed':r}
-    print(sendData)
+    # print(sendData)
     sio.emit('speed',sendData)
 
 if __name__ == '__main__':
