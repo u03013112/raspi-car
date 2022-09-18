@@ -16,8 +16,8 @@ class GPIO:
         self.pwm = gpio.PWM(pwmPin, 100)
         self.pwm.start(10)
 
-        self.servo = gpio.PWM(servoPin, 50)
-        self.servo.start(0)
+        self.servo = gpio.PWM(servoPin, 100)
+        self.servo.start(14)
         
     def setRaw(self,data):
         pwm = None

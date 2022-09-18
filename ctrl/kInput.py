@@ -40,33 +40,31 @@ class KInput:
             if self.ctrl0['up'] != self.ctrl['up'] :
                 self.ctrl0['up'] = self.ctrl['up']
                 if self.ctrl['up'] == 1 :
-                    self.sendRaw({'ch':'pwm','pwm':13,'status':'up'})
+                    self.sendRaw({'ch':'pwm','pwm':17,'status':'up'})
                 else :
                     self.sendRaw({'ch':'pwm','pwm':15,'status':'stop'})
 
             if self.ctrl0['down'] != self.ctrl['down'] :
                 self.ctrl0['down'] = self.ctrl['down']
                 if self.ctrl['down'] == 1 :
-                    self.sendRaw({'ch':'pwm','pwm':117,'status':'down'})
+                    self.sendRaw({'ch':'pwm','pwm':12,'status':'down'})
                 else :
                     self.sendRaw({'ch':'pwm','pwm':15,'status':'stop'})
             if self.ctrl0['left'] != self.ctrl['left'] :
                 self.ctrl0['left'] = self.ctrl['left']
                 if self.ctrl['left'] == 1 :
-                    self.sendRaw({'ch':'servo','pwm':9})
+                    self.sendRaw({'ch':'servo','pwm':19})
                     self.status = 'l'
                 else :
-                    self.sendRaw({'ch':'servo','pwm':7})
-                    self.status = '0'
+                    self.sendRaw({'ch':'servo','pwm':14})
+                    
             if self.ctrl0['right'] != self.ctrl['right'] :
                 self.ctrl0['right'] = self.ctrl['right']
                 if self.ctrl['right'] == 1 :
-                    self.sendRaw({'ch':'servo','pwm':6})
+                    self.sendRaw({'ch':'servo','pwm':9})
                     self.status = 'r'
                 else :
-                    self.sendRaw({'ch':'servo','pwm':8})
-                    self.sendRaw({'ch':'servo','pwm':7})
-                    self.status = '0'
+                    self.sendRaw({'ch':'servo','pwm':14})
                 
         keyboard.on_press(callback, suppress=True)
         keyboard.on_release(callback)

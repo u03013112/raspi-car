@@ -1,12 +1,37 @@
-from RPIO import PWM
+import RPi.GPIO as gpio
 
-servo = PWM.Servo()
+# https://sourceforge.net/p/raspberry-gpio-python/wiki/PWM/
 
-# Set servo on GPIO17 to 1200µs (1.2ms)
-servo.set_servo(17, 1200)
+import time
+# 频率
+frez = 100
+# 引脚
+pwmPin = 16
 
-# Set servo on GPIO17 to 2000µs (2.0ms)
-servo.set_servo(17, 2000)
+gpio.setmode(gpio.BOARD)
+gpio.setup(pwmPin, gpio.OUT)
 
-# Clear servo on GPIO17
-servo.stop_servo(17)
+pwm = gpio.PWM(pwmPin, frez)
+
+pwm.start(14)
+print('pwm is start')
+# time.sleep(10)
+
+pwm.ChangeDutyCycle(19)
+print('cycle:',19)
+time.sleep(1)
+
+pwm.ChangeDutyCycle(14)
+print('cycle:',14)
+time.sleep(1)
+
+# print('set pwm 0')
+# for i in range (8,20):
+#     pwm.ChangeDutyCycle(i)
+#     print('cycle:',i)
+#     time.sleep(1)
+# print('exit')
+# pwm.ChangeDutyCycle(15)
+# time.sleep(10)
+pwm.stop()
+gpio.cleanup()
