@@ -6,6 +6,7 @@ from kInput import KInput
 from ctrl import Ctrl
 from camera import Camera
 from ping import Ping
+from speed import Speed
 from guiNew import GUI
 
 if __name__ =='__main__':
@@ -23,11 +24,15 @@ if __name__ =='__main__':
     ping.start()
     wsc.setPing(ping)
 
+    speed = Speed(wsc)
+    speed.start()
+    wsc.setSpeed(speed)
+
     camera = Camera()
     camera.start()
 
     kInput = KInput(wsc)
     kInput.start()
 
-    gui = GUI(wsc,camera,ctrl,ping,kInput)
+    gui = GUI(wsc,camera,ctrl,ping,kInput,speed)
     gui.show()

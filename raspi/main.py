@@ -2,12 +2,15 @@ import eventlet
 import socketio
 from gpio2 import GPIO
 from execute import EXEC
+from speed import Speed
 import time
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
 gpio = GPIO()
 e = EXEC()
+s = Speed()
+s.start()
 
 @sio.event
 def connect(sid, environ):
@@ -39,6 +42,13 @@ def exec(sid, data):
 @sio.event
 def disconnect(sid):
     print('disconnect ', sid)
+
+@sio.event
+def speed(sid, data):
+    r = s.getSpeed()
+    sendData = {'speed':r}
+    print(sendData)
+    sio.emit('speed',sendData)
 
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 5000)), app)

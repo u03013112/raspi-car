@@ -4,7 +4,7 @@ from cv2 import cv2
 from PIL import Image, ImageDraw, ImageFont,ImageTk
 
 class GUI:
-    def __init__(self,wsc,camera,ctrl,ping,kInput):
+    def __init__(self,wsc,camera,ctrl,ping,kInput,speed):
         self.windowW=320+960
         self.windowH=720
         self.previewW=960
@@ -32,6 +32,7 @@ class GUI:
         self.ctrl = ctrl
         self.ping = ping
         self.kInput = kInput
+        self.speed = speed
 
         self.setupNetwork()
         self.setupUpdate()
@@ -48,7 +49,7 @@ class GUI:
         netwrokFrame = tk.Frame(self.leftFrame,width=320, height=80,bg='#FFB6C1')
         netwrokFrame.pack()
         statusLabel=tk.Label(netwrokFrame, text='网络状态：未连接', font=('Arial', 12))
-        statusLabel.place(x=10,y=15)
+        statusLabel.place(x=10,y=10)
         #放出去，方便之后不断更改
         self.networkStatusLabel = statusLabel
 
@@ -108,7 +109,8 @@ class GUI:
         # print('update')
         if self.wsc.ready == 1:
             pingDt = 'ping:'+str(self.ping.getDt())+'ms'
-            self.networkStatusLabel.configure(text='网络状态：已连接 '+ pingDt)
+            speedStr = '传动轴转速:'+str(self.speed.speed)+'转/秒'
+            self.networkStatusLabel.configure(text='网络状态：已连接 '+ pingDt + '\n' + speedStr)
             self.networkStatusLabel['bg']='#00FF00'
         else:
             self.networkStatusLabel.configure(text='网络状态：未连接')

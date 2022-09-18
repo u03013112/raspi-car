@@ -21,6 +21,11 @@ class WSC:
             if self.ping != None:
                 self.ping.pong(data)
 
+        @sio.event
+        def speed(data):
+            if self.speed != None:
+                self.speed.pong(data)
+
         self.ready = 0
         self.sio = sio
 
@@ -36,6 +41,9 @@ class WSC:
 
     def setPing(self,ping):
         self.ping = ping
+
+    def setSpeed(self,speed):
+        self.speed = speed
 
 if __name__ == '__main__':
     wsc = WSC()

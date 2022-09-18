@@ -17,12 +17,8 @@ class Speed():
     
     def timeThreadFunc(self):
         while True:
-            now = time.time()
-            if now - self.lastTime > 1 :
-                self.lastTime = now
-                # print(self.lastCount)
-                # 计数器清0
-                self.lastCount = 0
+            time.sleep(1)
+            self.lastCount = 0
 
     def speedThreadFunc(self):
         while True:
@@ -42,8 +38,8 @@ class Speed():
             t1.start()
             t2.start()
 
-            t1.join()
-            t2.join()
+            # t1.join()
+            # t2.join()
         except:
             print ("线程终止")
             pass
