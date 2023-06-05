@@ -1,4 +1,4 @@
-from cv2 import cv2
+import cv2
 import sys
 import time
 import math

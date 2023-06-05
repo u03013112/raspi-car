@@ -1,6 +1,6 @@
 #!/usr/bin/python3 
 import tkinter as tk
-from cv2 import cv2
+import cv2
 from PIL import Image, ImageDraw, ImageFont,ImageTk
 
 class GUI:
