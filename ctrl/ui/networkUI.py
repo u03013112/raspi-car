@@ -117,8 +117,11 @@ def networkUiInit(left_frame):
     raspberry_ip_entry.pack(side="left", padx=5)
 
     connect_button = tk.Button(network_frame, text="连接", command=lambda: connect_to_raspberry(network_info_var, raspberry_ip_var), state="disabled")
+    connect_button.pack(side="left", pady=5, padx=(0, 5))
 
-    connect_button.pack(pady=5)
+    # 添加一个新按钮，用于重新获取本机 IP 和树莓派 IP
+    refresh_ips_button = tk.Button(network_frame, text="刷新IP", command=lambda: Thread(target=get_ips, args=(local_ip_var, raspberry_ip_var, network_info_var)).start())
+    refresh_ips_button.pack(side="left", pady=5)
 
     Thread(target=get_ips, args=(local_ip_var, raspberry_ip_var, network_info_var)).start()
 
