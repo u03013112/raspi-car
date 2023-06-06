@@ -1,16 +1,20 @@
 import eventlet
 import socketio
-from gpio2 import GPIO
 from execute import EXEC
-from speed import Speed
 import time
 
 sio = socketio.Server()
 app = socketio.WSGIApp(sio)
-gpio = GPIO()
 e = EXEC()
-s = Speed()
-s.start()
+
+try:
+    from gpio2 import GPIO
+    gpio = GPIO()
+    from speed import Speed
+    s = Speed()
+    s.start()
+except Exception as e:
+    print(e)
 
 @sio.event
 def connect(sid, environ):

@@ -5,14 +5,10 @@ import netifaces
 import socketio
 
 # 全局变量，websocket连接
-# 这里没有过度封装，所以不记录连接状态，如果希望获得连接状态，去读network_info_var
-# 这里规定，当websocket连接成功时，network_info_var会被设置为"连接成功"，请直接用下面枚举做比较
 websocket = None
 
-# 枚举定义，连接成功，断开连接，连接中对应的network_info_var的值
-CONNECT_STATUS_SUCCESS = "连接成功"
-CONNECT_STATUS_DISCONNECT = "断开连接"
-CONNECT_STATUS_ING = "连接中"
+# 全局变量，网络是否准备好
+isNetworkReady = False
 
 def get_local_ip(local_ip_var, network_info_var):
     network_info_var.set("正在获取本机IP...")
@@ -43,7 +39,8 @@ def connect_to_raspberry(network_info_var,raspberry_ip_var):
     raspberry_ip = raspberry_ip_var.get()
     print("树莓派 IP:", raspberry_ip)
 
-    if network_info_var.get() != CONNECT_STATUS_SUCCESS:
+    global isNetworkReady
+    if isNetworkReady == False:
         global websocket
         if websocket == None:
             websocket = socketio.Client()
@@ -51,15 +48,16 @@ def connect_to_raspberry(network_info_var,raspberry_ip_var):
             @websocket.event
             def connect():
                 print('connection established')
-                network_info_var.set(CONNECT_STATUS_SUCCESS)
-                
+                network_info_var.set('连接成功')
+                isNetworkReady = True
+
             @websocket.event
             def disconnect():
                 print('disconnected from server')
-                network_info_var.set(CONNECT_STATUS_DISCONNECT)
-            
+                network_info_var.set('连接断开')
+                isNetworkReady = False
         try:
-            network_info_var.set(CONNECT_STATUS_ING)
+            network_info_var.set('正在连接...')
             websocket.connect("http://" + raspberry_ip + ":5000")
         except Exception as e:
             print("连接失败:", e)
