@@ -9,7 +9,7 @@
 
 import tkinter as tk
 from networkUI import NetworkUI
-
+from cameraUI import CameraUI
 def main():
     # 创建主窗口
     root = tk.Tk()
@@ -28,6 +28,7 @@ def main():
     right_frame.pack(side="right", fill="both")
 
     networkUI = NetworkUI(left_frame)
+    cameraUI = CameraUI(right_frame,networkUI)
 
     # 运行主循环
     root.mainloop()

@@ -1,3 +1,4 @@
+# networkUI.py
 import socket
 import tkinter as tk
 from threading import Thread
@@ -149,3 +150,13 @@ class NetworkUI:
     def get_ips(self):
         self.get_local_ip()
         self.get_raspberry_ip()
+
+    def getLocalIP(self):
+        return self.local_ip_var.get()
+    
+    def getRaspberryIP(self):
+        return self.raspberry_ip_var.get()
+
+    def exec(self, cmd):
+        print("执行命令:", cmd)
+        self.websocket.emit("exec", cmd)
