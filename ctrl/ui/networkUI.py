@@ -4,124 +4,120 @@ from threading import Thread
 import netifaces
 import socketio
 
-# 全局变量，websocket连接
-websocket = None
+class NetworkUI:
+    def __init__(self, left_frame):
+        self.websocket = None
+        self.isNetworkReady = False
 
-# 全局变量，网络是否准备好
-isNetworkReady = False
+        self.network_frame = tk.Frame(left_frame, bg="yellow", bd=1, relief="solid")
 
-def get_local_ip(local_ip_var, network_info_var):
-    network_info_var.set("正在获取本机IP...")
-    try:
-        interface_name = 'en0'
-        addr = netifaces.ifaddresses(interface_name)
-        local_ip = addr[netifaces.AF_INET][0]['addr']
-        local_ip_var.set(local_ip)
-    except:
-        local_ip_var.set("获取本机IP失败")
-    else:
-        network_info_var.set("获取本机IP成功")
+        # 获取left_frame的宽度和高度
+        left_frame.update_idletasks()
+        left_frame_width = left_frame.winfo_width() - 10  # 减去 10 像素，以留出左右各 5 像素的内边距
+        left_frame_height = left_frame.winfo_height()
 
+        # 使用place方法将network_frame放置在水平居中的位置，并向下偏移 5 像素以留出上方的内边距
+        self.network_frame.place(relx=0.5, y=15, anchor="n", width=left_frame_width)
 
-def get_raspberry_ip(raspberry_ip_var, network_info_var):
-    network_info_var.set("正在获取树莓派IP...")
-    try:
-        raspberry_ip = socket.gethostbyname("raspi.local")
-        raspberry_ip_var.set(raspberry_ip)
-    except:
-        raspberry_ip_var.set("")
-        network_info_var.set("树莓派IP发现失败，请手动填写")
-    else:
-        network_info_var.set("树莓派IP成功")
+        self.network_info_var = tk.StringVar()
+        self.local_ip_var = tk.StringVar()
+        self.raspberry_ip_var = tk.StringVar()
 
-def connect_to_raspberry(network_info_var,raspberry_ip_var):
-    print("连接树莓派")
-    raspberry_ip = raspberry_ip_var.get()
-    print("树莓派 IP:", raspberry_ip)
+        title_label = tk.Label(self.network_frame, text="网络状态", font=("Arial", 14, "bold"), anchor="w")
+        title_label.pack(pady=(10, 5), padx=(10, 0), anchor="w")
 
-    global isNetworkReady
-    if isNetworkReady == False:
-        global websocket
-        if websocket == None:
-            websocket = socketio.Client()
+        network_info_label = tk.Label(self.network_frame, textvariable=self.network_info_var, anchor="w")
+        network_info_label.pack(pady=5, padx=(10, 0), anchor="w")
+        self.network_info_var.set("请先连接树莓派")
 
-            @websocket.event
-            def connect():
-                print('connection established')
-                network_info_var.set('连接成功')
-                isNetworkReady = True
+        # 本机IP及其输入框
+        local_ip_frame = tk.Frame(self.network_frame, bg="pink")
+        local_ip_frame.pack(pady=(2, 2))
 
-            @websocket.event
-            def disconnect():
-                print('disconnected from server')
-                network_info_var.set('连接断开')
-                isNetworkReady = False
+        local_ip_label = tk.Label(local_ip_frame, text="本机IP:", width=8, anchor="e")
+        local_ip_label.pack(side="left", padx=5)
+        local_ip_entry = tk.Entry(local_ip_frame, textvariable=self.local_ip_var)
+        local_ip_entry.pack(side="left", padx=5)
+
+        # 树莓派IP及其输入框
+        raspberry_ip_frame = tk.Frame(self.network_frame, bg="pink")
+        raspberry_ip_frame.pack(pady=(2, 2))
+
+        raspberry_ip_label = tk.Label(raspberry_ip_frame, text="树莓派IP:", width=8, anchor="e")
+        raspberry_ip_label.pack(side="left", padx=5)
+        raspberry_ip_entry = tk.Entry(raspberry_ip_frame, textvariable=self.raspberry_ip_var)
+        raspberry_ip_entry.pack(side="left", padx=5)
+
+        connect_button = tk.Button(self.network_frame, text="连接", command=self.connect_to_raspberry, state="disabled")
+        connect_button.pack(side="left", pady=5, padx=(0, 5))
+
+        # 添加一个新按钮，用于重新获取本机 IP 和树莓派 IP
+        refresh_ips_button = tk.Button(self.network_frame, text="刷新IP", command=lambda: Thread(target=self.get_ips).start())
+        refresh_ips_button.pack(side="left", pady=5)
+
+        Thread(target=self.get_ips).start()
+
+        self.local_ip_var.trace("w", lambda *args: self.check_ips_and_toggle_button(connect_button))
+        self.raspberry_ip_var.trace("w", lambda *args: self.check_ips_and_toggle_button(connect_button))
+
+    def get_local_ip(self):
+        self.network_info_var.set("正在获取本机IP...")
         try:
-            network_info_var.set('正在连接...')
-            websocket.connect("http://" + raspberry_ip + ":5000")
-        except Exception as e:
-            print("连接失败:", e)
-            network_info_var.set("连接失败: {}".format(e))
+            interface_name = 'en0'
+            addr = netifaces.ifaddresses(interface_name)
+            local_ip = addr[netifaces.AF_INET][0]['addr']
+            self.local_ip_var.set(local_ip)
+        except:
+            self.local_ip_var.set("获取本机IP失败")
+        else:
+            self.network_info_var.set("获取本机IP成功")
 
-def check_ips_and_toggle_button(local_ip_var, raspberry_ip_var, connect_button):
-    if local_ip_var.get() and raspberry_ip_var.get():
-        connect_button.config(state="normal")
-    else:
-        connect_button.config(state="disabled")
+    def get_raspberry_ip(self):
+        self.network_info_var.set("正在获取树莓派IP...")
+        try:
+            raspberry_ip = socket.gethostbyname("raspi.local")
+            self.raspberry_ip_var.set(raspberry_ip)
+        except:
+            self.raspberry_ip_var.set("")
+            self.network_info_var.set("树莓派IP发现失败，请手动填写")
+        else:
+            self.network_info_var.set("树莓派IP成功")
 
-def get_ips(local_ip_var, raspberry_ip_var, network_info_var):
-    get_local_ip(local_ip_var, network_info_var)
-    get_raspberry_ip(raspberry_ip_var, network_info_var)
+    def connect_to_raspberry(self):
+        print("连接树莓派")
+        raspberry_ip = self.raspberry_ip_var.get()
+        print("树莓派 IP:", raspberry_ip)
 
+        if self.isNetworkReady == False:
+            if self.websocket == None:
+                self.websocket = socketio.Client()
 
-def networkUiInit(left_frame):
-    network_frame = tk.Frame(left_frame, bg="yellow", bd=1, relief="solid")
+                @self.websocket.event
+                def connect():
+                    print('connection established')
+                    self.network_info_var.set('连接成功')
+                    self.isNetworkReady = True
+                    self.network_frame.config(bg="#90EE90")
 
-    # 获取left_frame的宽度和高度
-    left_frame.update_idletasks()
-    left_frame_width = left_frame.winfo_width() - 10  # 减去 10 像素，以留出左右各 5 像素的内边距
-    left_frame_height = left_frame.winfo_height()
+                @self.websocket.event
+                def disconnect():
+                    print('disconnected from server')
+                    self.network_info_var.set('连接断开')
+                    self.isNetworkReady = False
+                    self.network_frame.config(bg="yellow") 
+            try:
+                self.network_info_var.set('正在连接...')
+                self.websocket.connect("http://" + raspberry_ip + ":5000")
+            except Exception as e:
+                print("连接失败:", e)
+                self.network_info_var.set("连接失败: {}".format(e))
 
-    # 使用place方法将network_frame放置在水平居中的位置，并向下偏移 5 像素以留出上方的内边距
-    network_frame.place(relx=0.5, y=15, anchor="n", width=left_frame_width)
+    def check_ips_and_toggle_button(self, connect_button):
+        if self.local_ip_var.get() and self.raspberry_ip_var.get():
+            connect_button.config(state="normal")
+        else:
+            connect_button.config(state="disabled")
 
-    network_info_var = tk.StringVar()
-    local_ip_var = tk.StringVar()
-    raspberry_ip_var = tk.StringVar()
-
-    title_label = tk.Label(network_frame, text="网络状态", font=("Arial", 14, "bold"), anchor="w")
-    title_label.pack(pady=(10, 5), padx=(10, 0), anchor="w")
-
-    network_info_label = tk.Label(network_frame, textvariable=network_info_var, anchor="w")
-    network_info_label.pack(pady=5, padx=(10, 0), anchor="w")
-    network_info_var.set("请先连接树莓派")
-
-    # 本机IP及其输入框
-    local_ip_frame = tk.Frame(network_frame, bg="pink")
-    local_ip_frame.pack(pady=(2, 2))
-
-    local_ip_label = tk.Label(local_ip_frame, text="本机IP:", width=8, anchor="e")
-    local_ip_label.pack(side="left", padx=5)
-    local_ip_entry = tk.Entry(local_ip_frame, textvariable=local_ip_var)
-    local_ip_entry.pack(side="left", padx=5)
-
-    # 树莓派IP及其输入框
-    raspberry_ip_frame = tk.Frame(network_frame, bg="pink")
-    raspberry_ip_frame.pack(pady=(2, 2))
-
-    raspberry_ip_label = tk.Label(raspberry_ip_frame, text="树莓派IP:", width=8, anchor="e")
-    raspberry_ip_label.pack(side="left", padx=5)
-    raspberry_ip_entry = tk.Entry(raspberry_ip_frame, textvariable=raspberry_ip_var)
-    raspberry_ip_entry.pack(side="left", padx=5)
-
-    connect_button = tk.Button(network_frame, text="连接", command=lambda: connect_to_raspberry(network_info_var, raspberry_ip_var), state="disabled")
-    connect_button.pack(side="left", pady=5, padx=(0, 5))
-
-    # 添加一个新按钮，用于重新获取本机 IP 和树莓派 IP
-    refresh_ips_button = tk.Button(network_frame, text="刷新IP", command=lambda: Thread(target=get_ips, args=(local_ip_var, raspberry_ip_var, network_info_var)).start())
-    refresh_ips_button.pack(side="left", pady=5)
-
-    Thread(target=get_ips, args=(local_ip_var, raspberry_ip_var, network_info_var)).start()
-
-    local_ip_var.trace("w", lambda *args: check_ips_and_toggle_button(local_ip_var, raspberry_ip_var, connect_button))
-    raspberry_ip_var.trace("w", lambda *args: check_ips_and_toggle_button(local_ip_var, raspberry_ip_var, connect_button))
+    def get_ips(self):
+        self.get_local_ip()
+        self.get_raspberry_ip()

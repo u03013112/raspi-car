@@ -8,7 +8,7 @@
 # 右侧背景色白色
 
 import tkinter as tk
-from networkUI import networkUiInit
+from networkUI import NetworkUI
 
 def main():
     # 创建主窗口
@@ -27,7 +27,7 @@ def main():
     right_frame = tk.Frame(root, width=960, height=720, bg="white")
     right_frame.pack(side="right", fill="both")
 
-    networkUiInit(left_frame)
+    networkUI = NetworkUI(left_frame)
 
     # 运行主循环
     root.mainloop()
