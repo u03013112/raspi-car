@@ -4,10 +4,21 @@ from threading import Thread
 import netifaces
 import socketio
 
+
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
+
+from ctrl.ping import Ping
+
+
 class NetworkUI:
     def __init__(self, left_frame):
         self.websocket = None
         self.isNetworkReady = False
+        self.ping_thread = None
 
         self.network_frame = tk.Frame(left_frame, bg="yellow", bd=1, relief="solid")
 
@@ -99,12 +110,29 @@ class NetworkUI:
                     self.isNetworkReady = True
                     self.network_frame.config(bg="#90EE90")
 
+                    # 创建并启动 Ping 线程
+                    self.ping_thread = Ping(self.websocket)
+                    self.ping_thread.start()
+
                 @self.websocket.event
                 def disconnect():
                     print('disconnected from server')
                     self.network_info_var.set('连接断开')
                     self.isNetworkReady = False
                     self.network_frame.config(bg="yellow") 
+
+                    # 停止 Ping 线程
+                    if self.ping_thread:
+                        self.ping_thread.join()
+                        self.ping_thread = None
+                
+                @self.websocket.event
+                def ping(data):
+                    if self.ping_thread:
+                        self.ping_thread.pong(data)
+                        latency = self.ping_thread.getDt()
+                        self.network_info_var.set(f"连接成功 - {latency} ms")
+
             try:
                 self.network_info_var.set('正在连接...')
                 self.websocket.connect("http://" + raspberry_ip + ":5000")

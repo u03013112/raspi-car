@@ -15,7 +15,8 @@ class Ping(threading.Thread):
         while True:
             self.lastTime = time.time()
             self.id += 1
-            self.wsc.send('ping',{'id':self.id})
+            # self.wsc.send('ping',{'id':self.id})
+            self.wsc.emit('ping', {'id': self.id})  # 修改这一行
             # print('ping',self.id)
             time.sleep(1)
     def pong(self,data):
@@ -24,6 +25,7 @@ class Ping(threading.Thread):
             self.time = time.time() - self.lastTime
             self.finishId = data['id']
             self.dt = data['time'] - time.time()
+            # print('pong',self.dt)
     def getDt(self):
         if self.id > self.finishId + 1 :
             return '>1000'
