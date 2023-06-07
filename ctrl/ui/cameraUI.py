@@ -151,5 +151,5 @@ class CameraUI:
                 image = Image.fromarray(app1.frame)
                 self.update_image(image)
             else:
-                print("No frame")
+                # print("No frame")
                 time.sleep(1)
