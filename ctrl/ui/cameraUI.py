@@ -9,6 +9,52 @@
 
 import tkinter as tk
 from PIL import Image, ImageTk
+import threading
+import gi
+import numpy as np
+import cv2
+import os
+import time
+
+gi.require_version("Gst", "1.0")
+gi.require_version("GstApp", "1.0")
+from gi.repository import Gst
+
+Gst.init(None)
+
+gi.require_version("Gst", "1.0")
+gi.require_version("GstApp", "1.0")
+from gi.repository import Gst
+
+Gst.init(None)
+
+class App:
+    def __init__(self, port):
+        self.frame = None
+        self.pipeline = self.create_pipeline(port)
+
+    def on_new_sample(self, sink):
+        print("on_new_sample")
+        sample = sink.emit("pull-sample")
+        buffer = sample.get_buffer()
+        caps = sample.get_caps()
+        width = caps.get_structure(0).get_value("width")
+        height = caps.get_structure(0).get_value("height")
+
+        success, mapinfo = buffer.map(Gst.MapFlags.READ)
+        if success:
+            self.frame = np.ndarray((height, width, 3), buffer=mapinfo.data, dtype=np.uint8)
+            buffer.unmap(mapinfo)
+
+        return Gst.FlowReturn.OK
+
+    def create_pipeline(self, port):
+        # pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=BGR ! appsink name=sink emit-signals=True sync=False")
+        pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=BGR ! queue max-size-buffers=1 max-size-time=0 ! appsink name=sink emit-signals=True sync=False")
+
+        sink = pipeline.get_by_name("sink")
+        sink.connect("new-sample", self.on_new_sample)
+        return pipeline
 
 class CameraUI:
     def __init__(self, right_frame, networkUI):
@@ -45,6 +91,11 @@ class CameraUI:
         restart_camera_button = tk.Button(control_frame, text="重启摄像头", command=self.restart_camera)
         restart_camera_button.pack(side="left", padx=(0, 5))
 
+        # 启动一个新的线程来执行update_frames方法
+        update_frames_thread = threading.Thread(target=self.update_frames)
+        update_frames_thread.daemon = True
+        update_frames_thread.start()
+
     def connect_camera(self):
         # 连接摄像头的逻辑
         pass
@@ -63,3 +114,29 @@ class CameraUI:
     def resize_image(self, image, width, height):
         # 将图像调整为指定的宽度和高度
         return image.resize((width, height), Image.ANTIALIAS)
+
+    def update_frames(self):
+        app1 = App(5000)
+        app2 = App(5001)
+
+        app1.pipeline.set_state(Gst.State.PLAYING)
+        app2.pipeline.set_state(Gst.State.PLAYING)
+
+        while True:
+            if app1.frame is not None and app2.frame is not None:
+                combined_frame = np.hstack((app1.frame, app2.frame))
+                image = Image.fromarray(combined_frame)
+                self.update_image(image)
+            else:
+                print("No frame")
+                time.sleep(1)
+            # 下面用于测试
+            # 客户端，macos端 简单测试
+            # gst-launch-1.0 avfvideosrc ! videoconvert ! videoscale ! video/x-raw,width=640,height=480 ! jpegenc ! queue max-size-buffers=1 max-size-time=0 ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000
+
+            # if app1.frame is not None:
+            #     image = Image.fromarray(app1.frame)
+            #     self.update_image(image)
+            # else:
+            #     print("No frame")
+            #     time.sleep(1)
