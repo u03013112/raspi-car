@@ -34,7 +34,7 @@ class App:
         self.pipeline = self.create_pipeline(port)
 
     def on_new_sample(self, sink):
-        print("on_new_sample")
+        # print("on_new_sample")
         sample = sink.emit("pull-sample")
         buffer = sample.get_buffer()
         caps = sample.get_caps()
@@ -111,9 +111,22 @@ class CameraUI:
         self.camera_canvas.create_image(0, 0, image=photo, anchor="nw")
         self.camera_canvas.image = photo
 
-    def resize_image(self, image, width, height):
-        # 将图像调整为指定的宽度和高度
-        return image.resize((width, height), Image.ANTIALIAS)
+    def resize_image(self, image, target_width, target_height):
+        # 获取图像的原始宽度和高度
+        original_width, original_height = image.size
+
+        # 计算新的宽度和高度，使其与目标宽度和高度相符，但保持原始图像的长宽比
+        aspect_ratio = float(original_width) / float(original_height)
+        if target_width / aspect_ratio < target_height:
+            new_width = target_width
+            new_height = int(target_width / aspect_ratio)
+        else:
+            new_width = int(target_height * aspect_ratio)
+            new_height = target_height
+
+        # 将图像调整为新的宽度和高度
+        return image.resize((new_width, new_height), Image.ANTIALIAS)
+
 
     def update_frames(self):
         app1 = App(5000)
@@ -123,20 +136,20 @@ class CameraUI:
         app2.pipeline.set_state(Gst.State.PLAYING)
 
         while True:
-            if app1.frame is not None and app2.frame is not None:
-                combined_frame = np.hstack((app1.frame, app2.frame))
-                image = Image.fromarray(combined_frame)
-                self.update_image(image)
-            else:
-                print("No frame")
-                time.sleep(1)
-            # 下面用于测试
-            # 客户端，macos端 简单测试
-            # gst-launch-1.0 avfvideosrc ! videoconvert ! videoscale ! video/x-raw,width=640,height=480 ! jpegenc ! queue max-size-buffers=1 max-size-time=0 ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000
-
-            # if app1.frame is not None:
-            #     image = Image.fromarray(app1.frame)
+            # if app1.frame is not None and app2.frame is not None:
+            #     combined_frame = np.hstack((app1.frame, app2.frame))
+            #     image = Image.fromarray(combined_frame)
             #     self.update_image(image)
             # else:
             #     print("No frame")
             #     time.sleep(1)
+            # 下面用于测试
+            # 客户端，macos端 简单测试
+            # gst-launch-1.0 avfvideosrc ! videoconvert ! videoscale ! video/x-raw,width=640,height=480 ! jpegenc ! queue max-size-buffers=1 max-size-time=0 ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000
+
+            if app1.frame is not None:
+                image = Image.fromarray(app1.frame)
+                self.update_image(image)
+            else:
+                print("No frame")
+                time.sleep(1)
