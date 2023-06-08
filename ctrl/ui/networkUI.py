@@ -72,6 +72,17 @@ class NetworkUI:
         self.local_ip_var.trace("w", lambda *args: self.check_ips_and_toggle_button(connect_button))
         self.raspberry_ip_var.trace("w", lambda *args: self.check_ips_and_toggle_button(connect_button))
 
+    def close(self):
+        # 断开与树莓派的连接
+        if self.websocket:
+            self.websocket.disconnect()
+            self.websocket = None
+
+        # 停止 Ping 线程
+        if self.ping_thread:
+            self.ping_thread.join()
+            self.ping_thread = None
+
     def get_local_ip(self):
         self.network_info_var.set("正在获取本机IP...")
         try:

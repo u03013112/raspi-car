@@ -30,6 +30,15 @@ def main():
     networkUI = NetworkUI(left_frame)
     cameraUI = CameraUI(right_frame,networkUI)
 
+    # 定义一个函数，用于在关闭窗口时调用两个 close 方法
+    def on_closing():
+        networkUI.close()
+        cameraUI.close()
+        root.destroy()
+
+    # 为 root 窗口定义一个 protocol，当用户点击窗口的关闭按钮时，调用 on_closing 函数
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+
     # 运行主循环
     root.mainloop()
 

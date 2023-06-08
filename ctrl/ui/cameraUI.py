@@ -78,6 +78,12 @@ class CameraUI:
         self.calibImage = None
         self.check_exceptions()
 
+        self.app1 = App(5000)
+        self.app2 = App(5001)
+
+        self.app1.pipeline.set_state(Gst.State.PLAYING)
+        self.app2.pipeline.set_state(Gst.State.PLAYING)
+
         # 在这里，我们添加了两个变量来存储当前的方位角和高度角，为了等角投影
         self.current_azimuth = 0
         self.current_elevation = 0
@@ -143,6 +149,11 @@ class CameraUI:
         update_frames_thread.daemon = True
         update_frames_thread.start()
 
+    def close(self):
+        # 停止GStreamer管道
+        self.app1.pipeline.set_state(Gst.State.NULL)
+        self.app2.pipeline.set_state(Gst.State.NULL)
+
     def changeMode(self,mode):
         self.mode = mode
 
@@ -198,11 +209,8 @@ class CameraUI:
         # 此函数整个就在一个分线程中运行，后台尝试更新界面
         # 请不要在此线程中尝试调用imshow等方法，因为这些方法必须在主线程中调用
 
-        app1 = App(5000)
-        app2 = App(5001)
-
-        app1.pipeline.set_state(Gst.State.PLAYING)
-        app2.pipeline.set_state(Gst.State.PLAYING)
+        app1 = self.app1
+        app2 = self.app2
 
         while True:
             image = None
