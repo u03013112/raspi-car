@@ -8,6 +8,8 @@
 # 初始状态控件组只有两个按钮，按钮的文字为“连接摄像头”和“重启摄像头”
 
 import tkinter as tk
+import tkinter.messagebox as messagebox
+
 from PIL import Image, ImageTk
 import threading
 import gi
@@ -15,6 +17,11 @@ import numpy as np
 import cv2
 import os
 import time
+
+from u0_stitcher.stitcher import Stitcher
+from u0_stitcher.errors import CircleCenterNotCalibratedException, StitchNotCalibratedException
+from Equirec2Perspec import Equirectangular
+
 
 gi.require_version("Gst", "1.0")
 gi.require_version("GstApp", "1.0")
@@ -63,6 +70,14 @@ class CameraUI:
         self.networkUI = networkUI
         self.camera_frame = tk.Frame(right_frame, bg="lightgray")
 
+        self.mode = 'original'
+        self.pano = Stitcher()
+        self.circle_center_exception = 0
+        self.stitch_exception = 0
+        # calibImage 只用于校准时候的图片
+        self.calibImage = None
+        self.check_exceptions()
+
         # 获取right_frame的宽度和高度
         right_frame.update_idletasks()
         right_frame_width = right_frame.winfo_width() - 10  # 减去 10 像素，以留出左右各 5 像素的内边距
@@ -83,28 +98,62 @@ class CameraUI:
 
         # 创建控件组
         control_frame = tk.Frame(self.camera_frame, bg="lightgray")
-        control_frame.place(relx=1, rely=1, x=-5, y=-10, anchor="se", height=40)
+        control_frame.place(relx=1, rely=1, x=-5, y=-10, anchor="se", height=120)
 
-        # 添加连接摄像头按钮
-        connect_camera_button = tk.Button(control_frame, text="连接摄像头", command=self.connect_camera)
-        connect_camera_button.pack(side="left", padx=(0, 5))
+        # 第一行
+        row1_frame = tk.Frame(control_frame, bg="lightgray")
+        row1_frame.pack(side="top", pady=(0, 5))
 
         # 添加重启摄像头按钮
-        restart_camera_button = tk.Button(control_frame, text="重启摄像头", command=self.restart_camera)
+        restart_camera_button = tk.Button(row1_frame, text="重启摄像头", command=self.restart_camera)
         restart_camera_button.pack(side="left", padx=(0, 5))
+
+        # 第二行
+        row2_frame = tk.Frame(control_frame, bg="lightgray")
+        row2_frame.pack(side="top", pady=(0, 5))
+
+        # 添加各种模式按钮
+        originalModeButton = tk.Button(row2_frame, text="原始模式", command=lambda: self.changeMode("original"))
+        originalModeButton.pack(side="left", padx=(0, 5))
+
+        eqDistanceModeButton = tk.Button(row2_frame, text="等距模式", command=lambda: self.changeMode("equal_distance_projection"))
+        eqDistanceModeButton.pack(side="left", padx=(0, 5))
+
+        eqAngleModeButton = tk.Button(row2_frame, text="等角模式", command=lambda: self.changeMode("equal_angle_projection"))
+        eqAngleModeButton.pack(side="left", padx=(0, 5))
+
+        # 第三行
+        row3_frame = tk.Frame(control_frame, bg="lightgray")
+        row3_frame.pack(side="top", pady=(0, 5))
+
+        # 添加切换主摄像头按钮
+        switch_camera_button = tk.Button(row3_frame, text="切换主摄像头", command=self.switch_camera)
+        switch_camera_button.pack(side="left", padx=(0, 5))
+
+        # 添加重新校准按钮
+        calibrate_button = tk.Button(row3_frame, text="重新校准", command=self.calibrate)
+        calibrate_button.pack(side="left", padx=(0, 5))
 
         # 启动一个新的线程来执行update_frames方法
         update_frames_thread = threading.Thread(target=self.update_frames)
         update_frames_thread.daemon = True
         update_frames_thread.start()
 
-    def connect_camera(self):
-        # 连接摄像头的逻辑
-        pass
+    def changeMode(self,mode):
+        self.mode = mode
+
+    def switch_camera(self):
+        if self.pano.config['img1'] == 'left':
+            self.pano.calibMainCamera('right')
+        else:
+            self.pano.calibMainCamera('left')
+
+    def calibrate(self):
+        self.stitch_exception = 1
 
     def restart_camera(self):
-        # 重启摄像头的逻辑
         pass
+        
 
     def update_image(self, image):
         # 更新摄像头画面
@@ -128,8 +177,23 @@ class CameraUI:
         # 将图像调整为新的宽度和高度
         return image.resize((new_width, new_height), Image.ANTIALIAS)
 
+    def check_exceptions(self):
+        if self.circle_center_exception:
+            # 弹出警告窗口
+            messagebox.showwarning("Warning", "需要校准圆心")
+            # 处理异常
+            self.pano.calibCircleCenter(self.calibImage)
+            # 重置异常状态
+            self.circle_center_exception = 0
+
+        # 在1秒后再次运行此函数
+        self.camera_frame.after(1000, self.check_exceptions)
+
 
     def update_frames(self):
+        # 此函数整个就在一个分线程中运行，后台尝试更新界面
+        # 请不要在此线程中尝试调用imshow等方法，因为这些方法必须在主线程中调用
+
         app1 = App(5000)
         app2 = App(5001)
 
@@ -147,13 +211,90 @@ class CameraUI:
                 image = Image.fromarray(combined_frame)
             elif app1.frame is not None:
                 self.camera_title_var.set("摄像头 1 已连接")
-                image = Image.fromarray(app1.frame)
+                image = app1.frame
             elif app2.frame is not None:
                 self.camera_title_var.set("摄像头 2 已连接")
                 image = Image.fromarray(app2.frame)
             
             if image is not None:
-                self.update_image(image)
+                if self.mode == 'original':
+                    retFrame = image
+                elif self.mode == 'equal_distance_projection' or self.mode == 'equal_angle_projection':
+                    # 下面这些except暂未测试，可能会有bug
+                    try:
+                        retFrame = self.pano.stitch(image)
+                    except CircleCenterNotCalibratedException as e:
+                        # print(e)
+                        # self.pano.calibCircleCenter(image)
+                        self.calibImage = image
+                        self.circle_center_exception = 1
+                        time.sleep(1)
+                    except StitchNotCalibratedException as e:
+                        print(e)
+                        self.pano.calibStitch(image)
+                    else:
+                        if self.mode == 'equal_angle_projection':
+                            equ = Equirectangular(retFrame)
+                            # retFrame = equ.GetPerspective(120, 0, 0, 785, 967)
+                            # print(retFrame.shape)
+                            # retFrame = equ.GetPerspective(120, self.current_azimuth, self.current_elevation, 785, 764)
+                            retFrame = equ.GetPerspective(120, self.current_azimuth, self.current_elevation, 256, 256)
+
+                            # 在右上角绘制半透明圆和箭头
+                            circle_radius = 50
+                            circle_center = (retFrame.shape[1] - circle_radius - 10, circle_radius + 10)
+                            arrow_length = 30
+                            arrow_tip = (circle_center[0], circle_center[1] - arrow_length)
+
+                            # 创建一个与retFrame大小相同的透明图层
+                            overlay = retFrame.copy()
+
+                            # 在透明图层上绘制圆形
+                            cv2.circle(overlay, circle_center, circle_radius, (255, 255, 255), -1)
+
+                            # 将透明图层添加到retFrame上，设置透明度为0.5
+                            retFrame = cv2.addWeighted(overlay, 0.5, retFrame, 0.5, 0)
+
+                            # 在retFrame上绘制箭头
+                            retFrame = cv2.arrowedLine(retFrame, circle_center, arrow_tip, (0, 0, 0), 2)
+
+                            # 绘制半透明扇形
+                            angle_start = 90 - self.current_azimuth - 60
+                            angle_end = 90 - self.current_azimuth + 60
+
+                            # 创建一个与retFrame大小相同的透明图层
+                            overlay = retFrame.copy()
+
+                            # 在透明图层上绘制扇形
+                            for angle in np.arange(angle_start, angle_end, 1):
+                                x = int(circle_center[0] + circle_radius * np.cos(np.radians(angle)))
+                                y = int(circle_center[1] - circle_radius * np.sin(np.radians(angle)))
+                                cv2.line(overlay, circle_center, (x, y), (0, 255, 0), 2)
+
+                            # 将透明图层添加到retFrame上，设置透明度为0.5
+                            retFrame = cv2.addWeighted(overlay, 0.5, retFrame, 0.5, 0)
+
+                            # 添加水平角度和垂直角度文本
+                            angle_text_h = "H: {:.1f} deg".format(self.current_azimuth)
+                            angle_text_v = "V: {:.1f} deg".format(self.current_elevation)
+                            retFrame = cv2.putText(retFrame, angle_text_h, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
+                            retFrame = cv2.putText(retFrame, angle_text_v, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
+                
+                    if self.stitch_exception == 1:
+                        self.stitch_exception = 0
+                        try:
+                            print('尝试重校准')
+                            self.pano.calibStitch(image)
+                        except:
+                            # 手动校准可能会由于一些原因导致校准失败，这里不做处理
+                            pass
+                try:
+                    retFrame = Image.fromarray(retFrame)
+                except:
+                    # 这里是校准的过程中会出现一些不可预料的结果，可能无法有效的转换为Image
+                    pass
+                else:
+                    self.update_image(retFrame)
             else:
                 time.sleep(1)
 
