@@ -28,6 +28,8 @@ from gi.repository import Gst
 
 Gst.init(None)
 
+# 暂时没想好名字，就叫App吧
+# 视频流接收器
 class App:
     def __init__(self, port):
         self.frame = None
@@ -114,7 +116,6 @@ class CameraUI:
     def resize_image(self, image, target_width, target_height):
         # 获取图像的原始宽度和高度
         original_width, original_height = image.size
-
         # 计算新的宽度和高度，使其与目标宽度和高度相符，但保持原始图像的长宽比
         aspect_ratio = float(original_width) / float(original_height)
         if target_width / aspect_ratio < target_height:
@@ -136,20 +137,24 @@ class CameraUI:
         app2.pipeline.set_state(Gst.State.PLAYING)
 
         while True:
-            # if app1.frame is not None and app2.frame is not None:
-            #     combined_frame = np.hstack((app1.frame, app2.frame))
-            #     image = Image.fromarray(combined_frame)
-            #     self.update_image(image)
-            # else:
-            #     print("No frame")
-            #     time.sleep(1)
-            # 下面用于测试
-            # 客户端，macos端 简单测试
-            # gst-launch-1.0 avfvideosrc ! videoconvert ! videoscale ! video/x-raw,width=640,height=480 ! jpegenc ! queue max-size-buffers=1 max-size-time=0 ! rtpjpegpay ! udpsink host=127.0.0.1 port=5000
-
-            if app1.frame is not None:
+            image = None
+            if app1.frame is None and app2.frame is None:
+                self.camera_title_var.set("摄像头未连接")
+                image = None
+            elif app1.frame is not None and app2.frame is not None:
+                self.camera_title_var.set("摄像头已连接")
+                combined_frame = np.hstack((app1.frame, app2.frame))
+                image = Image.fromarray(combined_frame)
+            elif app1.frame is not None:
+                self.camera_title_var.set("摄像头 1 已连接")
                 image = Image.fromarray(app1.frame)
+            elif app2.frame is not None:
+                self.camera_title_var.set("摄像头 2 已连接")
+                image = Image.fromarray(app2.frame)
+            
+            if image is not None:
                 self.update_image(image)
             else:
-                # print("No frame")
                 time.sleep(1)
+
+            

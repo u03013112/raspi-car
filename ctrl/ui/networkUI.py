@@ -132,7 +132,7 @@ class NetworkUI:
                     if self.ping_thread:
                         self.ping_thread.pong(data)
                         latency = self.ping_thread.getDt()
-                        self.network_info_var.set(f"连接成功 - {latency} ms")
+                        self.network_info_var.set(f"连接成功 ： {latency} ms")
 
             try:
                 self.network_info_var.set('正在连接...')
