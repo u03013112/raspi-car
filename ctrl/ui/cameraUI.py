@@ -78,6 +78,10 @@ class CameraUI:
         self.calibImage = None
         self.check_exceptions()
 
+        # 在这里，我们添加了两个变量来存储当前的方位角和高度角，为了等角投影
+        self.current_azimuth = 0
+        self.current_elevation = 0
+
         # 获取right_frame的宽度和高度
         right_frame.update_idletasks()
         right_frame_width = right_frame.winfo_width() - 10  # 减去 10 像素，以留出左右各 5 像素的内边距
@@ -235,15 +239,12 @@ class CameraUI:
                     else:
                         if self.mode == 'equal_angle_projection':
                             equ = Equirectangular(retFrame)
-                            # retFrame = equ.GetPerspective(120, 0, 0, 785, 967)
-                            # print(retFrame.shape)
-                            # retFrame = equ.GetPerspective(120, self.current_azimuth, self.current_elevation, 785, 764)
                             retFrame = equ.GetPerspective(120, self.current_azimuth, self.current_elevation, 256, 256)
 
                             # 在右上角绘制半透明圆和箭头
-                            circle_radius = 50
+                            circle_radius = 30
                             circle_center = (retFrame.shape[1] - circle_radius - 10, circle_radius + 10)
-                            arrow_length = 30
+                            arrow_length = 20
                             arrow_tip = (circle_center[0], circle_center[1] - arrow_length)
 
                             # 创建一个与retFrame大小相同的透明图层
@@ -277,8 +278,8 @@ class CameraUI:
                             # 添加水平角度和垂直角度文本
                             angle_text_h = "H: {:.1f} deg".format(self.current_azimuth)
                             angle_text_v = "V: {:.1f} deg".format(self.current_elevation)
-                            retFrame = cv2.putText(retFrame, angle_text_h, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
-                            retFrame = cv2.putText(retFrame, angle_text_v, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
+                            retFrame = cv2.putText(retFrame, angle_text_h, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv2.LINE_AA)
+                            retFrame = cv2.putText(retFrame, angle_text_v, (circle_center[0] - circle_radius, circle_center[1] + circle_radius + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1, cv2.LINE_AA)
                 
                     if self.stitch_exception == 1:
                         self.stitch_exception = 0

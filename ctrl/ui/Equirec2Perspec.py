@@ -44,7 +44,7 @@ class Equirectangular:
         #
         # THETA is left/right angle, PHI is up/down angle, both in degree
         #
-        start_time = timeit.default_timer()
+        # start_time = timeit.default_timer()
         f = 0.5 * width * 1 / np.tan(0.5 * FOV / 180.0 * np.pi)
         cx = (width - 1) / 2.0
         cy = (height - 1) / 2.0
@@ -75,6 +75,6 @@ class Equirectangular:
         # .astype(np.float32)
         # persp = cv2.remap(self._img, XY[..., 0], XY[..., 1], cv2.INTER_CUBIC, borderMode=cv2.BORDER_WRAP)
         persp = cv2.remap(self._img, XY[..., 0], XY[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
-        elapsed_time = timeit.default_timer() - start_time
-        print(f"Execution time: {elapsed_time * 1000:.2f} ms")
+        # elapsed_time = timeit.default_timer() - start_time
+        # print(f"Execution time: {elapsed_time * 1000:.2f} ms")
         return persp
