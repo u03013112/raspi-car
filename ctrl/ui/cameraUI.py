@@ -20,7 +20,7 @@ import time
 
 from u0_stitcher.stitcher import Stitcher
 from u0_stitcher.errors import CircleCenterNotCalibratedException, StitchNotCalibratedException
-from Equirec2Perspec import Equirectangular
+from Equirec2PerspecNew import Equirectangular
 
 
 gi.require_version("Gst", "1.0")
@@ -239,7 +239,7 @@ class CameraUI:
                     else:
                         if self.mode == 'equal_angle_projection':
                             equ = Equirectangular(retFrame)
-                            retFrame = equ.GetPerspective(120, self.current_azimuth, self.current_elevation, 256, 256)
+                            retFrame = equ.GetPerspective(120,90, self.current_azimuth, self.current_elevation, 300, 400)
 
                             # 在右上角绘制半透明圆和箭头
                             circle_radius = 30
