@@ -58,8 +58,8 @@ class App:
         return Gst.FlowReturn.OK
 
     def create_pipeline(self, port):
-        # pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=BGR ! appsink name=sink emit-signals=True sync=False")
-        pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=BGR ! queue max-size-buffers=1 max-size-time=0 ! appsink name=sink emit-signals=True sync=False")
+        pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! queue max-size-buffers=1 max-size-time=0 ! appsink name=sink emit-signals=True sync=False")
+
 
         sink = pipeline.get_by_name("sink")
         sink.connect("new-sample", self.on_new_sample)
@@ -167,7 +167,8 @@ class CameraUI:
         self.stitch_exception = 1
 
     def restart_camera(self):
-        pass
+        # 执行 bash /home/git/raspi-car/raspi/start.sh 192.168.1.101
+        self.networkUI.websocket.emit('exec',{'cmd':'bash /home/git/raspi-car/raspi/start.sh 192.168.1.101 &'})
         
 
     def update_image(self, image):
@@ -219,14 +220,13 @@ class CameraUI:
                 image = None
             elif app1.frame is not None and app2.frame is not None:
                 self.camera_title_var.set("摄像头已连接")
-                combined_frame = np.hstack((app1.frame, app2.frame))
-                image = Image.fromarray(combined_frame)
+                image = np.hstack((app1.frame, app2.frame))
             elif app1.frame is not None:
                 self.camera_title_var.set("摄像头 1 已连接")
                 image = app1.frame
             elif app2.frame is not None:
                 self.camera_title_var.set("摄像头 2 已连接")
-                image = Image.fromarray(app2.frame)
+                image = app2.frame
             
             if image is not None:
                 if self.mode == 'original':
@@ -299,10 +299,12 @@ class CameraUI:
                             pass
                 try:
                     retFrame = Image.fromarray(retFrame)
-                except:
+                except Exception as e:
                     # 这里是校准的过程中会出现一些不可预料的结果，可能无法有效的转换为Image
+                    print('转换为Image失败:',e)
                     pass
                 else:
+                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                     self.update_image(retFrame)
             else:
                 time.sleep(1)

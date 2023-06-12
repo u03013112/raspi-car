@@ -10,6 +10,15 @@
 import tkinter as tk
 from networkUI import NetworkUI
 from cameraUI import CameraUI
+
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
+
+from ctrl.kInput import KInput
+
 def main():
     # 创建主窗口
     root = tk.Tk()
@@ -29,6 +38,8 @@ def main():
 
     networkUI = NetworkUI(left_frame)
     cameraUI = CameraUI(right_frame,networkUI)
+    kInput = KInput(networkUI,cameraUI)
+    kInput.start()
 
     # 定义一个函数，用于在关闭窗口时调用两个 close 方法
     def on_closing():

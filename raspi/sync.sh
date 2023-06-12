@@ -1,8 +1,8 @@
 #!/bin/bash
-raspiIP=192.168.40.62
+raspiIP=192.168.1.104
 SRC=/Users/u03013112/Documents/git/raspi-car
 # DST=root@${raspiIP}:/home/pi/raspi-car/
-DST=root@192.168.40.62:/home/git/
+DST=root@${raspiIP}:/home/git/
 trap 'exit' INT
 while :
     do
