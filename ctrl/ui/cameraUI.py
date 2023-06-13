@@ -41,8 +41,22 @@ class App:
     def __init__(self, port):
         self.frame = None
         self.pipeline = self.create_pipeline(port)
+        self.lastTime = 0
+        self.fps = 0
 
     def on_new_sample(self, sink):
+        if self.lastTime == 0:
+            self.lastTime = time.time()
+            self.fps += 1
+        else:
+            now = time.time()
+            if now - self.lastTime > 1:
+                self.lastTime = now
+                print('self.fps:', self.fps)
+                self.fps = 0
+            else:
+                self.fps += 1
+
         # print("on_new_sample")
         sample = sink.emit("pull-sample")
         buffer = sample.get_buffer()
@@ -173,15 +187,12 @@ class CameraUI:
 
     def update_image(self, image):
         # 更新摄像头画面
-        image = self.resize_image(image, self.camera_canvas.winfo_width(), self.camera_canvas.winfo_height())
         photo = ImageTk.PhotoImage(image)
         self.camera_canvas.create_image(0, 0, image=photo, anchor="nw")
         self.camera_canvas.image = photo
 
-    def resize_image(self, image, target_width, target_height):
-        # 获取图像的原始宽度和高度
-        original_width, original_height = image.size
-        # 计算新的宽度和高度，使其与目标宽度和高度相符，但保持原始图像的长宽比
+    def resize_image_opencv(self,image, target_width, target_height):
+        original_height, original_width = image.shape[:2]
         aspect_ratio = float(original_width) / float(original_height)
         if target_width / aspect_ratio < target_height:
             new_width = target_width
@@ -190,9 +201,8 @@ class CameraUI:
             new_width = int(target_height * aspect_ratio)
             new_height = target_height
 
-        # 将图像调整为新的宽度和高度
-        return image.resize((new_width, new_height), Image.ANTIALIAS)
-
+        return cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
+    
     def check_exceptions(self):
         if self.circle_center_exception:
             # 弹出警告窗口
@@ -213,6 +223,8 @@ class CameraUI:
         app1 = self.app1
         app2 = self.app2
 
+        lastTime = 0
+        fps = 0
         while True:
             image = None
             if app1.frame is None and app2.frame is None:
@@ -298,6 +310,7 @@ class CameraUI:
                             # 手动校准可能会由于一些原因导致校准失败，这里不做处理
                             pass
                 try:
+                    retFrame = self.resize_image_opencv(retFrame, self.camera_canvas.winfo_width(), self.camera_canvas.winfo_height())
                     retFrame = Image.fromarray(retFrame)
                 except Exception as e:
                     # 这里是校准的过程中会出现一些不可预料的结果，可能无法有效的转换为Image
@@ -306,6 +319,19 @@ class CameraUI:
                 else:
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                     self.update_image(retFrame)
+
+                    if lastTime == 0:
+                        lastTime = time.time()
+                        fps += 1
+                    else:
+                        now = time.time()
+                        if now - lastTime > 1:
+                            lastTime = now
+                            print('fps:', fps)
+                            fps = 0
+                        else:
+                            fps += 1
+                            
             else:
                 time.sleep(1)
 
