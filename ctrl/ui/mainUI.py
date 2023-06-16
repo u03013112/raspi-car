@@ -10,6 +10,7 @@
 import tkinter as tk
 from networkUI import NetworkUI
 from cameraUI import CameraUI
+from infoUI import InfoUI
 
 import sys
 from pathlib import Path
@@ -37,7 +38,11 @@ def main():
     right_frame.pack(side="right", fill="both")
 
     networkUI = NetworkUI(left_frame)
+    infoUI = InfoUI(left_frame)
+    infoUI.update_info("hello\nworld")
+
     cameraUI = CameraUI(right_frame,networkUI)
+
     kInput = KInput(networkUI,cameraUI)
     kInput.start()
 
