@@ -7,6 +7,11 @@
 # 在右下角，添加一个控件组，显示在图片上，遮盖掉图片的一部分
 # 初始状态控件组只有两个按钮，按钮的文字为“连接摄像头”和“重启摄像头”
 
+# 得到目前的现实时间
+# 原始模式30ms左右
+# 等距模式50ms左右
+# 等角模式60ms左右
+
 import tkinter as tk
 import tkinter.messagebox as messagebox
 
@@ -42,20 +47,26 @@ class App:
         self.frame = None
         self.pipeline = self.create_pipeline(port)
         self.lastTime = 0
-        self.fps = 0
+        # self.fps = 0
+        self.timestamp = 0
+        
 
     def on_new_sample(self, sink):
-        if self.lastTime == 0:
-            self.lastTime = time.time()
-            self.fps += 1
-        else:
-            now = time.time()
-            if now - self.lastTime > 1:
-                self.lastTime = now
-                print('self.fps:', self.fps)
-                self.fps = 0
-            else:
-                self.fps += 1
+        if __debug__:
+            self.timestamp = time.time()
+            
+        
+        # if self.lastTime == 0:
+        #     self.lastTime = time.time()
+        #     self.fps += 1
+        # else:
+        #     now = time.time()
+        #     if now - self.lastTime > 1:
+        #         self.lastTime = now
+        #         print('self.fps:', self.fps)
+        #         self.fps = 0
+        #     else:
+        #         self.fps += 1
 
         # print("on_new_sample")
         sample = sink.emit("pull-sample")
@@ -73,7 +84,6 @@ class App:
 
     def create_pipeline(self, port):
         pipeline = Gst.parse_launch(f"udpsrc port={port} ! application/x-rtp,media=video,payload=26,clock-rate=90000,encoding-name=JPEG ! rtpjpegdepay ! jpegdec ! videoconvert ! video/x-raw,format=RGB ! queue max-size-buffers=1 max-size-time=0 ! appsink name=sink emit-signals=True sync=False")
-
 
         sink = pipeline.get_by_name("sink")
         sink.connect("new-sample", self.on_new_sample)
@@ -223,8 +233,14 @@ class CameraUI:
         app1 = self.app1
         app2 = self.app2
 
-        lastTime = 0
-        fps = 0
+        if __debug__:
+            imgTimestamp1 = 0
+            imgTimestamp2 = 0
+
+            lastTime = 0
+            fps = 0
+            totalTime = 0
+
         while True:
             image = None
             if app1.frame is None and app2.frame is None:
@@ -233,9 +249,18 @@ class CameraUI:
             elif app1.frame is not None and app2.frame is not None:
                 self.camera_title_var.set("摄像头已连接")
                 image = np.hstack((app1.frame, app2.frame))
+                if __debug__:
+                    imgTimestamp1 = app1.timestamp
+                    imgTimestamp2 = app2.timestamp
+
             elif app1.frame is not None:
                 self.camera_title_var.set("摄像头 1 已连接")
                 image = app1.frame
+                if __debug__:
+                    if imgTimestamp1 == app1.timestamp:
+                        continue                        
+                    imgTimestamp1 = app1.timestamp
+
             elif app2.frame is not None:
                 self.camera_title_var.set("摄像头 2 已连接")
                 image = app2.frame
@@ -319,18 +344,26 @@ class CameraUI:
                 else:
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                     self.update_image(retFrame)
+                    if __debug__:
+                        # dt = time.time() - min(imgTimestamp1, imgTimestamp2)
+                        dt = time.time() - imgTimestamp1
+                        # print('%.1f ms'%(dt*1000))
 
-                    if lastTime == 0:
-                        lastTime = time.time()
-                        fps += 1
-                    else:
-                        now = time.time()
-                        if now - lastTime > 1:
-                            lastTime = now
-                            print('fps:', fps)
-                            fps = 0
-                        else:
+                        if lastTime == 0:
+                            lastTime = time.time()
                             fps += 1
+                        else:
+                            now = time.time()
+                            if now - lastTime > 1:
+                                lastTime = now
+                                print('fps:', fps, 'avg time:%.1f ms'%(float(totalTime) / float(fps) * 1000))
+                                fps = 0
+                                totalTime = 0
+                            else:
+                                fps += 1
+                                totalTime += dt
+
+
                             
             else:
                 time.sleep(1)
