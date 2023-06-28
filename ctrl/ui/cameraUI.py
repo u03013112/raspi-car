@@ -54,19 +54,6 @@ class App:
     def on_new_sample(self, sink):
         if __debug__:
             self.timestamp = time.time()
-            
-        
-        # if self.lastTime == 0:
-        #     self.lastTime = time.time()
-        #     self.fps += 1
-        # else:
-        #     now = time.time()
-        #     if now - self.lastTime > 1:
-        #         self.lastTime = now
-        #         print('self.fps:', self.fps)
-        #         self.fps = 0
-        #     else:
-        #         self.fps += 1
 
         # print("on_new_sample")
         sample = sink.emit("pull-sample")
@@ -240,6 +227,9 @@ class CameraUI:
             lastTime = 0
             fps = 0
             totalTime = 0
+            totalTimeA = 0
+            totalTimeB = 0
+            totalTimeC = 0
 
         while True:
             image = None
@@ -260,6 +250,8 @@ class CameraUI:
                     if imgTimestamp1 == app1.timestamp:
                         continue                        
                     imgTimestamp1 = app1.timestamp
+                    # print('A:%.2fms'%((time.time()-imgTimestamp1)*1000))
+                    dtA = time.time()-imgTimestamp1
 
             elif app2.frame is not None:
                 self.camera_title_var.set("摄像头 2 已连接")
@@ -343,7 +335,9 @@ class CameraUI:
                     pass
                 else:
                     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                    dtB = time.time()-imgTimestamp1
                     self.update_image(retFrame)
+                    dtC = time.time()-imgTimestamp1
                     if __debug__:
                         # dt = time.time() - min(imgTimestamp1, imgTimestamp2)
                         dt = time.time() - imgTimestamp1
@@ -357,11 +351,20 @@ class CameraUI:
                             if now - lastTime > 1:
                                 lastTime = now
                                 print('fps:', fps, 'avg time:%.1f ms'%(float(totalTime) / float(fps) * 1000))
+                                print('avg timeA:%.1f ms'%(float(totalTimeA) / float(fps) * 1000))
+                                print('avg timeB:%.1f ms'%(float(totalTimeB) / float(fps) * 1000))
+                                print('avg timeC:%.1f ms'%(float(totalTimeC) / float(fps) * 1000))
                                 fps = 0
                                 totalTime = 0
+                                totalTimeA = 0
+                                totalTimeB = 0
+                                totalTimeC = 0
                             else:
                                 fps += 1
                                 totalTime += dt
+                                totalTimeA += dtA
+                                totalTimeB += dtB
+                                totalTimeC += dtC
 
 
                             
