@@ -1,48 +1,82 @@
-# server.py
-import socket
 import cv2
-import numpy as np
+import socket
+import struct
+import time
+import threading
 
-# 创建一个TCP套接字
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 全局变量，用于存储每秒发送的帧数
+frame_count = 0
 
-# 绑定到一个地址和端口
-server_address = ('localhost', 10000)
-print('服务器正在启动，绑定到 {}:{}'.format(*server_address))
-sock.bind(server_address)
+def print_frame_count():
+    global frame_count
+    while True:
+        print("Frames sent in the last second: ", frame_count)
+        frame_count = 0
+        time.sleep(1)
 
-# 开始监听连接
-sock.listen(1)
+# 创建并启动新线程
+threading.Thread(target=print_frame_count).start()
+
+
+# 创建UDP套接字
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(('', 5000))
+sock.setblocking(0)  # 设置套接字为非阻塞模式
+
+frame_data = b''
+connected = False
+timeout = 3
+client_addr = None  # 保存客户端地址
+
+def connection_watchdog():
+    global connected, timeout
+    while True:
+        if connected:
+            timeout -= 1
+            if timeout <= 0:
+                connected = False
+                print("Disconnected")
+        time.sleep(1)
+
+# 启动连接监视线程
+watchdog_thread = threading.Thread(target=connection_watchdog)
+watchdog_thread.start()
+
+# 捕获摄像头视频
+cap = cv2.VideoCapture(1)
 
 while True:
-    print('等待连接...')
-    connection, client_address = sock.accept()
-
+    # 尝试接收客户端消息
     try:
-        print('连接来自 {}'.format(client_address))
-        data = b''
-        while True:
-            chunk = connection.recv(4096)
-            print('收到 {} 字节'.format(len(chunk)))
-            if len(chunk) < 4096:
-                data += chunk
-                break
-            data += chunk
+        data, addr = sock.recvfrom(1024)
+        if data:
+            connected = True
+            timeout = 3
+            client_addr = addr  # 保存客户端地址
+    except socket.error:
+        pass
 
-        if len(data) > 0:
-            np_data = np.frombuffer(data, dtype=np.uint8)
-            image = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
+    if connected and client_addr is not None:
+        ret, frame = cap.read()
+        frame = cv2.resize(frame, (320, 240))
+        ret, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
-            if image is not None:
-                print('收到图片')
-                cv2.imshow('Received Image', image)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+        frame_size = len(buffer)
+        # print('frameSize:',frame_size)
+        # 发送帧大小
+        sock.sendto(struct.pack('!I', frame_size), client_addr)
 
-                connection.sendall('图片已接收并显示'.encode('utf-8'))
-                print('已将消息发送回客户端')
-            else:
-                print('未收到有效图片数据')
+        # 发送帧数据
+        
+        for i in range(0, frame_size, 1024):
+            sock.sendto(buffer[i:i+1024], client_addr)
+        # sock.sendto(buffer, client_addr)
 
-    finally:
-        connection.close()
+        # 发送结束标记
+        sock.sendto(b'EOF\n', client_addr)
+
+        frame_count += 1
+
+cap.release()
+cv2.destroyAllWindows()
+sock.close()
