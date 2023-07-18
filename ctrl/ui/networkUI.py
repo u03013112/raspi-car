@@ -5,6 +5,7 @@ from threading import Thread
 import netifaces
 import socketio
 
+import time
 
 import sys
 from pathlib import Path
@@ -13,13 +14,18 @@ project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 from ctrl.ping import Ping
+from ctrl.speed import Speed
 
 
 class NetworkUI:
-    def __init__(self, left_frame):
+    def __init__(self, left_frame,infoUI):
+        # 用于将信息更新到UI上
+        self.infoUI = infoUI
+
         self.websocket = None
         self.isNetworkReady = False
         self.ping_thread = None
+        self.speed_thread = None
 
         self.network_frame = tk.Frame(left_frame, bg="yellow", bd=1, relief="solid")
 
@@ -83,6 +89,10 @@ class NetworkUI:
             self.ping_thread.join()
             self.ping_thread = None
 
+        if self.speed_thread:
+            self.speed_thread.join()
+            self.speed_thread = None
+
     def get_local_ip(self):
         self.network_info_var.set("正在获取本机IP...")
         try:
@@ -126,6 +136,13 @@ class NetworkUI:
                     self.ping_thread = Ping(self.websocket)
                     self.ping_thread.start()
 
+                    # 创建并启动 Speed 线程
+                    # 记录上一次的转速和时间
+                    self.lastRc = 0
+                    self.lastRct = time.time()
+                    self.speed_thread = Speed(self.websocket)
+                    self.speed_thread.start()
+
                 @self.websocket.event
                 def disconnect():
                     print('disconnected from server')
@@ -143,7 +160,22 @@ class NetworkUI:
                     if self.ping_thread:
                         self.ping_thread.pong(data)
                         latency = self.ping_thread.getDt()
+                        # print('ping',latency)
                         self.network_info_var.set(f"连接成功 ： {latency} ms")
+
+                @self.websocket.event
+                def speed(data):
+                    # 逻辑修改，传输协议不变，但是传输的内容由每秒转速，改为总转数，由这里计算速度
+                    now = time.time()
+                    rc = data['speed']
+                    dt = now - self.lastRct
+                    speed = (rc - self.lastRc) / dt
+                    # speed 取整
+                    speed = int(speed)
+                    self.lastRc = rc
+                    self.lastRct = now
+
+                    self.infoUI.update_info(f"主轴转速：{speed} 转每秒")
 
             try:
                 self.network_info_var.set('正在连接...')

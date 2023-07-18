@@ -9,8 +9,8 @@ class Speed(threading.Thread):
         self.speed = 0
     def run(self):
         while True:
-            self.wsc.send('speed',{})
-            # print('ping',self.id)
-            time.sleep(1)
+            # self.wsc.send('speed',{})
+            self.wsc.emit('speed',{})  # 修改这一行
+            time.sleep(0.5)
     def pong(self,data):
         self.speed = data['speed']

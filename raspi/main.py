@@ -49,6 +49,7 @@ def disconnect(sid):
 
 @sio.event
 def speed(sid, data):
+    # print('speed ', data)
     r = s.getSpeed()
     sendData = {'speed':r}
     # print(sendData)

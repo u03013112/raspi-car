@@ -1,35 +1,61 @@
-# client.py
-import socket
-import sys
 import cv2
+import numpy as np
+import socket
+import struct
+import time
+import threading
 
-if len(sys.argv) != 2:
-    print("用法：python client.py <图片路径>")
-    sys.exit(1)
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-image_path = sys.argv[1]
+def send_heartbeat():
+    while True:
+        sock.sendto(b'1', ('127.0.0.1', 5000))
+        time.sleep(1)
 
-# 创建一个TCP套接字
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 启动心跳发送线程
+heartbeat_thread = threading.Thread(target=send_heartbeat)
+heartbeat_thread.start()
 
-# 定义服务器地址和端口
-server_address = ('localhost', 10000)
+frame_data = b''
+frame_size = 0
 
-try:
-    print('连接到服务器 {}:{}'.format(*server_address))
-    sock.connect(server_address)
+# 全局变量，用于存储每秒接收的帧数
+received_frame_count = 0
 
-    with open(image_path, 'rb') as image_file:
-        image_data = image_file.read()
+def print_received_frame_count():
+    global received_frame_count
+    while True:
+        print("Frames received in the last second: ", received_frame_count)
+        received_frame_count = 0
+        time.sleep(1)
 
-    print('发送图片：{}'.format(image_path))
-    sock.sendall(image_data)
+# 创建并启动新线程
+threading.Thread(target=print_received_frame_count).start()
 
-    # 等待接收服务器的响应
-    print('等待接收响应...')
-    data = sock.recv(4096)
-    print('收到响应：{}'.format(data.decode('utf-8')))
+while True:
+    data, addr = sock.recvfrom(10240)
+    frame_data += data
 
-finally:
-    print('关闭套接字')
-    sock.close()
+    if frame_size == 0:
+        # 尝试解析帧大小
+        if len(frame_data) >= 4:
+            frame_size = struct.unpack('!I', frame_data[:4])[0]
+            frame_data = frame_data[4:]
+
+    elif frame_data[-4:] == b'EOF\n':
+        # 尝试解码接收到的数据
+        try:
+            frame = cv2.imdecode(np.frombuffer(frame_data[:-4], dtype=np.uint8), cv2.IMREAD_COLOR)
+            if frame is not None:
+                cv2.imshow('Video', frame)
+                frame_data = b''
+                frame_size = 0
+                received_frame_count += 1  # 增加接收到的帧数
+        except Exception as e:
+            pass
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cv2.destroyAllWindows()
+sock.close()

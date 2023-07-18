@@ -32,10 +32,10 @@ class Speed():
     # 开始测速
     def start(self):
         try:
-            t1 = threading.Thread( target=self.timeThreadFunc,args=() )
+            # t1 = threading.Thread( target=self.timeThreadFunc,args=() )
             t2 = threading.Thread( target=self.speedThreadFunc,args=() )
 
-            t1.start()
+            # t1.start()
             t2.start()
 
             # t1.join()

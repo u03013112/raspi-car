@@ -37,9 +37,10 @@ def main():
     right_frame = tk.Frame(root, width=960, height=720, bg="white")
     right_frame.pack(side="right", fill="both")
 
-    networkUI = NetworkUI(left_frame)
     infoUI = InfoUI(left_frame)
     infoUI.update_info("hello\nworld")
+
+    networkUI = NetworkUI(left_frame,infoUI)
 
     cameraUI = CameraUI(right_frame,networkUI)
 

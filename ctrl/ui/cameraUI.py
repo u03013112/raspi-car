@@ -179,7 +179,7 @@ class CameraUI:
 
     def restart_camera(self):
         # 执行 bash /home/git/raspi-car/raspi/start.sh 192.168.1.101
-        self.networkUI.websocket.emit('exec',{'cmd':'bash /home/git/raspi-car/raspi/start.sh 192.168.1.101 &'})
+        self.networkUI.websocket.emit('exec',{'cmd':'bash /home/git/raspi-car/raspi/start.sh 10.0.0.100 &'})
         
 
     def update_image(self, image):
@@ -348,23 +348,23 @@ class CameraUI:
                             fps += 1
                         else:
                             now = time.time()
-                            if now - lastTime > 1:
-                                lastTime = now
-                                print('fps:', fps, 'avg time:%.1f ms'%(float(totalTime) / float(fps) * 1000))
-                                print('avg timeA:%.1f ms'%(float(totalTimeA) / float(fps) * 1000))
-                                print('avg timeB:%.1f ms'%(float(totalTimeB) / float(fps) * 1000))
-                                print('avg timeC:%.1f ms'%(float(totalTimeC) / float(fps) * 1000))
-                                fps = 0
-                                totalTime = 0
-                                totalTimeA = 0
-                                totalTimeB = 0
-                                totalTimeC = 0
-                            else:
-                                fps += 1
-                                totalTime += dt
-                                totalTimeA += dtA
-                                totalTimeB += dtB
-                                totalTimeC += dtC
+                            # if now - lastTime > 1:
+                            #     lastTime = now
+                            #     print('fps:', fps, 'avg time:%.1f ms'%(float(totalTime) / float(fps) * 1000))
+                            #     # print('avg timeA:%.1f ms'%(float(totalTimeA) / float(fps) * 1000))
+                            #     # print('avg timeB:%.1f ms'%(float(totalTimeB) / float(fps) * 1000))
+                            #     # print('avg timeC:%.1f ms'%(float(totalTimeC) / float(fps) * 1000))
+                            #     fps = 0
+                            #     totalTime = 0
+                            #     # totalTimeA = 0
+                            #     # totalTimeB = 0
+                            #     # totalTimeC = 0
+                            # else:
+                            #     fps += 1
+                            #     totalTime += dt
+                            #     # totalTimeA += dtA
+                            #     # totalTimeB += dtB
+                            #     # totalTimeC += dtC
 
 
                             

@@ -1,5 +1,5 @@
 #!/bin/bash
-raspiIP=192.168.1.104
+raspiIP=10.0.0.102
 SRC=/Users/u03013112/Documents/git/raspi-car
 # DST=root@${raspiIP}:/home/pi/raspi-car/
 DST=root@${raspiIP}:/home/git/
